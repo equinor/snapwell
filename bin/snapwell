@@ -18,10 +18,10 @@
 from __future__ import print_function # so we can write print(..,end='')
 
 from ert.ecl import EclGrid, EclFile
-from ert_statoil.snapwell import SnapConfig, WellPath, snap
-from ert_statoil.snapwell import Inf, Nan
-from ert_statoil.snapwell import tryFloat
-from ert_statoil.snapwell import __version__ as VERSION
+from snapwell import SnapConfig, WellPath, snap
+from snapwell import Inf, Nan
+from snapwell import tryFloat
+from snapwell import __version__ as VERSION
 
 from os import path, makedirs
 import sys
