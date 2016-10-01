@@ -46,6 +46,13 @@ __maintainer__ = 'GBS IT SI SIB'
 __status__     = 'Prototype'
 __credits__    = ['PG Drange', 'K Flikka', 'KW Kongsvik']
 
+try:
+    import ert
+    import ert.ecl
+except ImportError as err:
+    print('Could not import module ert and ert.ecl.')
+    print('Make sure ert is installed and the python path correctly configured')
+    raise ImportError('snapwell is unable to locate module ert: %s' % str(err))
 
 from .wellpath      import WellPath
 from .snapconfig    import SnapConfig
