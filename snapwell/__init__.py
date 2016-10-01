@@ -36,6 +36,7 @@
 
 """
 
+__name__       = 'snapwell'
 __version__    = '1.0.0'
 
 __author__     = 'PG Drange, K Flikka, and KW Kongsvik'
