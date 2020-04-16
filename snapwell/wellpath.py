@@ -14,9 +14,9 @@
 #  See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
 #  for more details.
 
-from snap_utils import read_next_tokenline as token
-from snap_utils import Nan, Inf
-from snap_utils import finiteFloat, tryFloat, close
+from .snap_utils import read_next_tokenline as token
+from .snap_utils import Nan, Inf
+from .snap_utils import finiteFloat, tryFloat, close
 
 class WellPath:
     """A WellPath is essentially a dictionary of lists containing at the very least,

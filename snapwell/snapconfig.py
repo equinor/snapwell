@@ -14,11 +14,11 @@
 #  See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
 #  for more details.
 
-from wellpath import WellPath
-from snap_utils import read_config, parse_date, Inf, Nan
-from ert.config import ContentTypeEnum, ConfigParser
+from .wellpath import WellPath
+from .snap_utils import read_config, parse_date, Inf, Nan
+from res.config import ContentTypeEnum, ConfigParser
 
-from ert.ecl import EclGrid, EclFile
+from ecl import EclGrid, EclFile
 
 import datetime
 from os import path, makedirs

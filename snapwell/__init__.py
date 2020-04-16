@@ -48,12 +48,10 @@ __status__     = 'Prototype'
 __credits__    = ['PG Drange', 'K Flikka', 'KW Kongsvik']
 
 try:
-    import ert
-    import ert.ecl
+    import res
+    import ecl
 except ImportError as err:
-    print('Could not import module ert and ert.ecl.')
-    print('Make sure ert is installed and the python path correctly configured')
-    raise ImportError('snapwell is unable to locate module ert: %s' % str(err))
+    exit('snapwell needs ert {}'.format(err))
 
 from .wellpath      import WellPath
 from .snapconfig    import SnapConfig
@@ -62,3 +60,6 @@ from .snap_utils    import Inf, Nan, roundAwayFromEven
 from .snap_utils    import finiteFloat, tryFloat, close, dist
 from .snap_utils    import findRestartStep, findKeyword, enterSnapMode
 from .snap_utils    import parse_date
+
+import snapwell_main.__main__ as snapwellmain
+import snapviz_main.__main__ as snapvizmain
