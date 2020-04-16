@@ -14,11 +14,13 @@
 #  See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
 #  for more details.
 
-from ert.ecl import EclGrid, EclFile
-from snap_utils import Inf, Nan, roundAwayFromEven, findKeyword, enterSnapMode
-from snap_utils import close, dist
-
 import sys
+
+from ecl import EclGrid, EclFile
+
+from .snap_utils import Inf, Nan, roundAwayFromEven, findKeyword, enterSnapMode
+from .snap_utils import close, dist
+
 
 # The next ten lines are used for improved logging (skipping repeated lines)
 _snap_prevmsg    = ''

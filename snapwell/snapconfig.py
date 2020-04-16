@@ -14,16 +14,18 @@
 #  See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
 #  for more details.
 
-from .wellpath import WellPath
-from .snap_utils import read_config, parse_date, Inf, Nan
-from res.config import ContentTypeEnum, ConfigParser
-
-from ecl import EclGrid, EclFile
-
 import datetime
 from os import path, makedirs
 import logging
 from math import isnan
+
+from ecl import EclGrid, EclFile
+from res.config import ContentTypeEnum, ConfigParser
+
+from .wellpath import WellPath
+from .snap_utils import read_config, parse_date, Inf, Nan
+
+
 
 class SnapConfig:
     """A class for representing a Snapwell config object.  It contains
