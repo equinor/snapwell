@@ -16,7 +16,8 @@
 
 import sys
 
-from ecl import EclGrid, EclFile
+from ecl.eclfile import EclFile
+from ecl.grid import EclGrid
 
 from .snap_utils import Inf, Nan, roundAwayFromEven, findKeyword, enterSnapMode
 from .snap_utils import close, dist
@@ -39,7 +40,7 @@ def doprint(msg):
             print('         %d similar messages skipped\n' % _snap_prevmsgcnt)
         _snap_prevmsgcnt = 0
         _snap_prevmsg    = msg
-        print msg
+        print(msg)
 
 def _activeIdx(grid, i, j, k):
     """Get the active index corresponding to grid coordinate i, j, k.  Or -1."""

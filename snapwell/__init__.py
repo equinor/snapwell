@@ -61,5 +61,5 @@ from .snap_utils    import finiteFloat, tryFloat, close, dist
 from .snap_utils    import findRestartStep, findKeyword, enterSnapMode
 from .snap_utils    import parse_date
 
-import snapwell_main.__main__ as snapwellmain
-import snapviz_main.__main__ as snapvizmain
+from .snapwell_main import __main__ as snapwellmain
+from .snapviz_main import __main__ as snapvizmain

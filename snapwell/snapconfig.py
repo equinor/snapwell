@@ -19,7 +19,8 @@ from os import path, makedirs
 import logging
 from math import isnan
 
-from ecl import EclGrid, EclFile
+from ecl.eclfile import EclFile
+from ecl.grid import EclGrid
 from res.config import ContentTypeEnum, ConfigParser
 
 from .wellpath import WellPath

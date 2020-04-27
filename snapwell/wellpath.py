@@ -268,7 +268,7 @@ class WellPath:
             t = token(f)
             if t is None:
                 break
-            data = map(float, t.split())
+            data = [float(e) for e in t.split()]
             wp.addRaw(data)
         f.close()
 
