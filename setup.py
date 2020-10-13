@@ -7,8 +7,8 @@ setuptools.setup(
     requirements=["libecl", "equinor-libres"],
     entry_points={
         "console_scripts": [
-            "snapwell = snapwell:snapwellmain",
-            "snapviz = snapwell:snapvizmain",
+            "snapwell = snapwell.snapwell_main:main",
+            "snapviz = snapwell.snapviz_main:main",
         ]
     },
 )
