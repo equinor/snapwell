@@ -34,7 +34,6 @@ jobs:
           git clone --branch $LIBECL_VERSION --depth 1 https://github.com/equinor/libecl
           bash ert/.build_install.sh libecl
           bash ert/.build_install.sh libres
-          pip install -r ert/dev-requirements.txt
           pip install ert/
       - name: "Install snapwell"
         run: |
