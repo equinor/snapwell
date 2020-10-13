@@ -60,6 +60,3 @@ from .snap_utils import Inf, Nan, roundAwayFromEven
 from .snap_utils import finiteFloat, tryFloat, close, dist
 from .snap_utils import findRestartStep, findKeyword, enterSnapMode
 from .snap_utils import parse_date
-
-from .snapwell_main import __main__ as snapwellmain
-from .snapviz_main import __main__ as snapvizmain
