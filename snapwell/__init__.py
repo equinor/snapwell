@@ -36,30 +36,30 @@
 
 """
 
-__name__       = 'snapwell'
-__version__    = '1.0.0'
+__name__ = "snapwell"
+__version__ = "1.0.0"
 
-__author__     = 'PG Drange, K Flikka, and KW Kongsvik'
-__email__      = 'pgdr@statoil.com'
-__copyright__  = 'Copyright 2016, Statoil ASA'
-__license__    = 'GNU General Public License version 3'
-__maintainer__ = 'GBS IT SI SIB'
-__status__     = 'Prototype'
-__credits__    = ['PG Drange', 'K Flikka', 'KW Kongsvik']
+__author__ = "PG Drange, K Flikka, and KW Kongsvik"
+__email__ = "pgdr@statoil.com"
+__copyright__ = "Copyright 2016, Statoil ASA"
+__license__ = "GNU General Public License version 3"
+__maintainer__ = "GBS IT SI SIB"
+__status__ = "Prototype"
+__credits__ = ["PG Drange", "K Flikka", "KW Kongsvik"]
 
 try:
     import res
     import ecl
 except ImportError as err:
-    exit('snapwell needs ert {}'.format(err))
+    exit("snapwell needs ert {}".format(err))
 
-from .wellpath      import WellPath
-from .snapconfig    import SnapConfig
-from .snapecl       import snap
-from .snap_utils    import Inf, Nan, roundAwayFromEven
-from .snap_utils    import finiteFloat, tryFloat, close, dist
-from .snap_utils    import findRestartStep, findKeyword, enterSnapMode
-from .snap_utils    import parse_date
+from .wellpath import WellPath
+from .snapconfig import SnapConfig
+from .snapecl import snap
+from .snap_utils import Inf, Nan, roundAwayFromEven
+from .snap_utils import finiteFloat, tryFloat, close, dist
+from .snap_utils import findRestartStep, findKeyword, enterSnapMode
+from .snap_utils import parse_date
 
 from .snapwell_main import __main__ as snapwellmain
 from .snapviz_main import __main__ as snapvizmain
