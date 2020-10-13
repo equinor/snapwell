@@ -8,7 +8,6 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "snapwell = snapwell.snapwell_main:main",
-            "snapviz = snapwell.snapviz_main:main",
         ]
     },
 )
