@@ -18,8 +18,8 @@ import sys
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from ert_statoil.snapwell import SnapConfig, WellPath
-from ert_statoil.snapwell import __version__ as VERSION
+from snapwell import SnapConfig, WellPath
+from snapwell import __version__ as VERSION
 from mpl_toolkits.mplot3d import Axes3D
 
 
