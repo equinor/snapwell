@@ -27,14 +27,13 @@ from .wellpath import WellPath
 from .snap_utils import read_config, parse_date, Inf, Nan
 
 
-
 class SnapConfig:
     """A class for representing a Snapwell config object.  It contains
-       the filename (path) for grid, for restart file, and a list of
-       (welldata file, date)-pairs.
+    the filename (path) for grid, for restart file, and a list of
+    (welldata file, date)-pairs.
     """
 
-    def __init__(self, grid, restart, init = None):
+    def __init__(self, grid, restart, init=None):
         self._grid = None
         self._restart = None
         self._init = None
@@ -42,11 +41,11 @@ class SnapConfig:
         self._restartFile = restart
         self._initFile = init
         self._wellpath_config = []
-        self._output = '.'              # Output path
-        self._overwrite = False         # Are we allowed to overwrite files?
-        self._delta = Inf               # max ascend/descend rate for wellpaths
-        self._owc_offset = 0.5          # default OWC Z offset
-        self._owc_definition = ('SWAT', 0.7) # definition of OWC
+        self._output = "."  # Output path
+        self._overwrite = False  # Are we allowed to overwrite files?
+        self._delta = Inf  # max ascend/descend rate for wellpaths
+        self._owc_offset = 0.5  # default OWC Z offset
+        self._owc_definition = ("SWAT", 0.7)  # definition of OWC
         self._logKeywords = []
 
     def __len__(self):
@@ -65,18 +64,18 @@ class SnapConfig:
 
     def append(self, elt):
         """Append an elt=(fname, date) pair to wellpath.  In this setting, elt[0] should
-           be a string that is a filepath to a wellpath and elt[1] should be
-           datetime, corresponding to the restart time of this wellpath.
+        be a string that is a filepath to a wellpath and elt[1] should be
+        datetime, corresponding to the restart time of this wellpath.
 
         """
-        if type(elt[1]) is not type(datetime.datetime(2000,1,1)):
+        if type(elt[1]) is not type(datetime.datetime(2000, 1, 1)):
             raise TypeError("Need datetime object, not " + str(elt[1]))
         self._wellpath_config.append(elt)
 
     def setOwcOffset(self, owc):
         """This is the OWC Z offset value used.  That is, if OWC in the GRID is found to
-           be at 1761.3, and owc=0.5 (the usual value), then we are interested
-           in placing the wellpoint at 1761.3-0.5=1760.8.
+        be at 1761.3, and owc=0.5 (the usual value), then we are interested
+        in placing the wellpoint at 1761.3-0.5=1760.8.
 
         """
         self._owc_offset = float(owc)
@@ -84,25 +83,25 @@ class SnapConfig:
     def owcOffset(self):
         return self._owc_offset
 
-
     def addLogKeyword(self, log):
-        """ Add log keywords items
-        """
+        """Add log keywords items"""
         self._logKeywords.append(log)
 
     def logKeywords(self):
         return self._logKeywords
 
-
     def owcDefinition(self):
         """The definition of OWC might be owcDefinition=('SWAT', 0.7).  This
-           means that OWC is the first z-point from the bottom that has cell
-           property SWAT=0.7 (interpolated).  Can also be SGAS=0.1 ..."""
+        means that OWC is the first z-point from the bottom that has cell
+        property SWAT=0.7 (interpolated).  Can also be SGAS=0.1 ..."""
         return self._owc_definition
 
     def setOwcDefinition(self, owc_definition):
         if len(owc_definition) != 2:
-            raise ValueError('OWC Definition must be a (str, float)-pair, not %s' % str(owc_definition))
+            raise ValueError(
+                "OWC Definition must be a (str, float)-pair, not %s"
+                % str(owc_definition)
+            )
         self._owc_definition = tuple(owc_definition)
 
     def setDeltaZ(self, delta):
@@ -124,8 +123,8 @@ class SnapConfig:
     def setOverwrite(self, overwrite):
         """If this is set to True, we will overwrite the wellpath files.
 
-           This should not be set to true unless you know what you are doing,
-           hence the rigidity in "if overwrite is True".
+        This should not be set to true unless you know what you are doing,
+        hence the rigidity in "if overwrite is True".
         """
         self._overwrite = False
         if overwrite is True:
@@ -142,13 +141,16 @@ class SnapConfig:
         if self.depthType(idx):
             wp.setDepthType(self.depthType(idx))
             wp.setWindowDepth(self.windowDepth(idx))
-            print("Configuring depth: %s [%s]" % (str(wp.windowDepth()),str(wp.depthType())))
+            print(
+                "Configuring depth: %s [%s]"
+                % (str(wp.windowDepth()), str(wp.depthType()))
+            )
         return wp
 
     def filename(self, idx):
         """Return filename of idx'th wellpath."""
         return self._wellpath_config[idx][0]
-    
+
     def date(self, idx):
         """Return date of idx'th wellpath."""
         return self._wellpath_config[idx][1]
@@ -167,8 +169,10 @@ class SnapConfig:
 
     def gridFile(self):
         return self._gridFile
+
     def restartFile(self):
         return self._restartFile
+
     def initFile(self):
         return self._initFile
 
@@ -187,7 +191,6 @@ class SnapConfig:
             self._init = EclFile(self.initFile())
         return self._init
 
-
     @staticmethod
     def tryset(setter, value, content):
         if not value in content:
@@ -197,7 +200,7 @@ class SnapConfig:
             setter(val)
             return True
         except Exception as err:
-            logging.warning('Ill specified %s.  Ignoring. %s' % (value, err))
+            logging.warning("Ill specified %s.  Ignoring. %s" % (value, err))
 
     @staticmethod
     def addConfigItemFloat(parser, value, repeated=False):
@@ -209,69 +212,70 @@ class SnapConfig:
         item = parser.add(value, repeated)
         item.iset_type(0, ContentTypeEnum.CONFIG_PATH)
 
-
     @staticmethod
     def parse(fname):
         """Takes a configuration object containing grid file path, restart file
-           path and a list of wellpath-files and their restart dates.  Returns a
-           SnapWell object, containing this info.
+        path and a list of wellpath-files and their restart dates.  Returns a
+        SnapWell object, containing this info.
 
         """
 
         conf = ConfigParser()
 
+        SnapConfig.addConfigItemPath(conf, "GRID")
+        SnapConfig.addConfigItemPath(conf, "RESTART")
+        SnapConfig.addConfigItemPath(conf, "INIT")
+        SnapConfig.addConfigItemPath(conf, "OUTPUT")
 
-        SnapConfig.addConfigItemPath(conf, 'GRID')
-        SnapConfig.addConfigItemPath(conf, 'RESTART')
-        SnapConfig.addConfigItemPath(conf, 'INIT')
-        SnapConfig.addConfigItemPath(conf, 'OUTPUT')
+        overwrite_item = conf.add(
+            "OVERWRITE", False
+        )  # the last OVERWRITE specified counts
+        overwrite_item.iset_type(0, ContentTypeEnum.CONFIG_STRING)
 
-        overwrite_item = conf.add("OVERWRITE", False) # the last OVERWRITE specified counts
-        overwrite_item.iset_type(0 , ContentTypeEnum.CONFIG_STRING )
+        SnapConfig.addConfigItemFloat(conf, "OWC_OFFSET")
+        SnapConfig.addConfigItemFloat(conf, "DELTA_Z")
 
-        SnapConfig.addConfigItemFloat(conf, 'OWC_OFFSET')
-        SnapConfig.addConfigItemFloat(conf, 'DELTA_Z')
+        owc_def_item = conf.add("OWC_DEFINITION")  # e.g. OWC_DEFINITION SWAT 0.7
+        owc_def_item.iset_type(0, ContentTypeEnum.CONFIG_STRING)
+        owc_def_item.iset_type(1, ContentTypeEnum.CONFIG_FLOAT)
 
-        owc_def_item = conf.add('OWC_DEFINITION') # e.g. OWC_DEFINITION SWAT 0.7
-        owc_def_item.iset_type(0 , ContentTypeEnum.CONFIG_STRING )
-        owc_def_item.iset_type(1 , ContentTypeEnum.CONFIG_FLOAT )
+        log_item = conf.add("LOG")
+        log_item.iset_type(0, ContentTypeEnum.CONFIG_STRING)
 
-
-        log_item = conf.add('LOG')
-        log_item.iset_type(0 , ContentTypeEnum.CONFIG_STRING )
-
-        wellpath_item = conf.add("WELLPATH", True) # a series of WELLPATH/DATE pairs
-        wellpath_item.iset_type(0 , ContentTypeEnum.CONFIG_PATH )
-        wellpath_item.iset_type(1 , ContentTypeEnum.CONFIG_STRING )
+        wellpath_item = conf.add("WELLPATH", True)  # a series of WELLPATH/DATE pairs
+        wellpath_item.iset_type(0, ContentTypeEnum.CONFIG_PATH)
+        wellpath_item.iset_type(1, ContentTypeEnum.CONFIG_STRING)
 
         content = conf.parse(fname)
 
         # Grid
-        gridFile    = tryGetPath(content, 'GRID', 0, 0)
+        gridFile = tryGetPath(content, "GRID", 0, 0)
         if not gridFile:
-            logging.info('No GRID file specified?')
-            raise ValueError('Could not load GRID file from Snapwell config file.')
+            logging.info("No GRID file specified?")
+            raise ValueError("Could not load GRID file from Snapwell config file.")
 
         # Restart
-        restartFile = tryGetPath(content, 'RESTART', 0, 0)
+        restartFile = tryGetPath(content, "RESTART", 0, 0)
         if not restartFile:
-            logging.info('No RESTART file specified?')
-            raise ValueError('Could not load RESTART file from Snapwell config file.')
+            logging.info("No RESTART file specified?")
+            raise ValueError("Could not load RESTART file from Snapwell config file.")
 
         # init
         initFile = None
         if "INIT" in content:
-            initFile = tryGetPath(content, 'INIT', 0, 0)
+            initFile = tryGetPath(content, "INIT", 0, 0)
         s = SnapConfig(gridFile, restartFile, initFile)
 
         # output
         outputPath = None
         if "OUTPUT" in content:
-            outputPath = tryGetPath(content, 'OUTPUT', 0, 0)
+            outputPath = tryGetPath(content, "OUTPUT", 0, 0)
             if path.exists(outputPath):
                 if path.isfile(outputPath):
-                    raise ValueError('Provided output folder is a file.  Either delete file, or set a different output folder: %s'
-                                     % outputPath)
+                    raise ValueError(
+                        "Provided output folder is a file.  Either delete file, or set a different output folder: %s"
+                        % outputPath
+                    )
                 else:
                     s.setOutput(outputPath)
             else:
@@ -280,68 +284,72 @@ class SnapConfig:
 
         # overwrite
         overwrite = False
-        if 'OVERWRITE' in content:
-            overwrite = tryGet(content, 'OVERWRITE', 0, 0)
+        if "OVERWRITE" in content:
+            overwrite = tryGet(content, "OVERWRITE", 0, 0)
             try:
-                if overwrite.strip().lower() == 'true':
+                if overwrite.strip().lower() == "true":
                     overwrite = True
             except Exception as err:
                 logging.warning('Ill specified overwrite flag: "%s".' % err)
         s.setOverwrite(overwrite)
 
-
-        SnapConfig.tryset(s.setDeltaZ,      'DELTA_Z',      content)
-        SnapConfig.tryset(s.setOwcOffset,   'OWC_OFFSET',   content)
-
+        SnapConfig.tryset(s.setDeltaZ, "DELTA_Z", content)
+        SnapConfig.tryset(s.setOwcOffset, "OWC_OFFSET", content)
 
         # Loading OWC_DEFINITION
-        if 'OWC_DEFINITION' in content:
+        if "OWC_DEFINITION" in content:
             try:
-                if len(content['OWC_DEFINITION'][0]) != 2:
-                    logging.warning('Wrong number of arguments in OWC_DEFINITION.  Needs to be e.g. SWAT 0.7, got %s'
-                                    % str(content['OWC_DEFINITION'][0]))
+                if len(content["OWC_DEFINITION"][0]) != 2:
+                    logging.warning(
+                        "Wrong number of arguments in OWC_DEFINITION.  Needs to be e.g. SWAT 0.7, got %s"
+                        % str(content["OWC_DEFINITION"][0])
+                    )
                 else:
-                    owc_kw  = tryGet(content, 'OWC_DEFINITION', 0, 0)
-                    owc_val = tryGetFloat(content, 'OWC_DEFINITION', 0, 1)
+                    owc_kw = tryGet(content, "OWC_DEFINITION", 0, 0)
+                    owc_val = tryGetFloat(content, "OWC_DEFINITION", 0, 1)
                     s.setOwcDefinition((owc_kw, owc_val))
             except Exception as err:
                 logging.warning('Ill specified OWC_DEFINITION keyword: "%s".' % err)
         else:
-            logging.info('Using OWC definition %s' % str(s.owcDefinition()))
+            logging.info("Using OWC definition %s" % str(s.owcDefinition()))
 
-
-        if 'LOG' in content:
-            for i in range(len(content['LOG'])):
-                line = content['LOG'][i]
+        if "LOG" in content:
+            for i in range(len(content["LOG"])):
+                line = content["LOG"][i]
                 num_tokens = len(line)
                 if num_tokens < 1:
-                    raise ValueError('Missing data in LOG %d: "%s".' % (i+1, str(line)))
-                s.addLogKeyword(tryGet( content, 'LOG', i, 0))
+                    raise ValueError(
+                        'Missing data in LOG %d: "%s".' % (i + 1, str(line))
+                    )
+                s.addLogKeyword(tryGet(content, "LOG", i, 0))
 
         # Loading the wellpath file names
-        if 'WELLPATH' not in content:
-            logging.warning('No wellpaths provided in Snapwell config file.')
+        if "WELLPATH" not in content:
+            logging.warning("No wellpaths provided in Snapwell config file.")
             return s
 
-        for i in range(len(content['WELLPATH'])):
-            wp_line = content['WELLPATH'][i]
+        for i in range(len(content["WELLPATH"])):
+            wp_line = content["WELLPATH"][i]
             num_tokens = len(wp_line)
             if num_tokens < 2:
-                raise ValueError('Missing data in WELLPATH %d: "%s".' % (i+1, str(wp_line)))
+                raise ValueError(
+                    'Missing data in WELLPATH %d: "%s".' % (i + 1, str(wp_line))
+                )
 
-            fname    = tryGetPath(content, 'WELLPATH', i, 0)
-            date_str = tryGet( content, 'WELLPATH', i, 1)
+            fname = tryGetPath(content, "WELLPATH", i, 0)
+            date_str = tryGet(content, "WELLPATH", i, 1)
 
             if num_tokens > 2 and num_tokens != 4:
-                raise ValueError('WELLPATH format error.  Need 2 or 4 tokens, got %d tokens: %s'
-                                 % (num_tokens, str(wp_line)))
+                raise ValueError(
+                    "WELLPATH format error.  Need 2 or 4 tokens, got %d tokens: %s"
+                    % (num_tokens, str(wp_line))
+                )
 
             depth_type = None
             depth = -1
             if num_tokens == 4:
-                depth_type = tryGet( content, 'WELLPATH', i, 2)
-                depth = tryGetFloat( content, 'WELLPATH', i, 3)
-
+                depth_type = tryGet(content, "WELLPATH", i, 2)
+                depth = tryGetFloat(content, "WELLPATH", i, 3)
 
             date = None
             try:
@@ -349,8 +357,10 @@ class SnapConfig:
             except ValueError as err:
                 logging.info(str(err))
             if date is None:
-                raise ValueError('Could not read date from wellpath %d.  Got date string "%s".'
-                                 % (i+1, str(date_str)))
+                raise ValueError(
+                    'Could not read date from wellpath %d.  Got date string "%s".'
+                    % (i + 1, str(date_str))
+                )
             if depth_type:
                 s.append((fname, date, depth_type, depth))
             else:
@@ -362,19 +372,21 @@ def tryGetPath(cnt, key, idx1, idx2):
     try:
         return path.expanduser(cnt[key][idx1].getPath(idx2))
     except Exception as e:
-        logging.warning('Failed to load path key %s from Snapwell config file.' % key)
+        logging.warning("Failed to load path key %s from Snapwell config file." % key)
     return None
+
 
 def tryGet(cnt, key, idx1, idx2):
     try:
         return cnt[key][idx1][idx2]
     except Exception as e:
-        logging.warning('Failed to load key %s from Snapwell config file.' % key)
+        logging.warning("Failed to load key %s from Snapwell config file." % key)
     return None
+
 
 def tryGetFloat(cnt, key, idx1, idx2):
     try:
         return float(cnt[key][idx1][idx2])
     except Exception as e:
-        logging.warning('Failed to load key %s from Snapwell config file.' % key)
+        logging.warning("Failed to load key %s from Snapwell config file." % key)
     return None
