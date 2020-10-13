@@ -24,7 +24,6 @@ jobs:
         run: |
           echo "::add-path::${{ env.INSTALL_DIR}}/bin"
           echo "::set-env name=LD_LIBRARY_PATH::${{ env.INSTALL_DIR }}/lib:${{ env.INSTALL_DIR }}/lib64"
-          echo "::set-env name=DYLD_LIBRARY_PATH::${{ env.INSTALL_DIR }}/lib:${{ env.INSTALL_DIR }}/lib64"
           echo "::set-env name=PYTHONPATH::${{ env.INSTALL_DIR }}/lib/python${{ matrix.python-version }}/site-packages:${{ env.INSTALL_DIR }}/lib/python${{ matrix.python-version }}/dist-packages"
       - name: Install ERT and dependencies
         run: |
