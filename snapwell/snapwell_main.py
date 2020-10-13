@@ -21,10 +21,8 @@ import sys
 from os import makedirs, path
 from time import time
 
-from ert.ecl import EclFile, EclGrid
-from ert_statoil.snapwell import Inf, Nan, SnapConfig, WellPath
-from ert_statoil.snapwell import __version__ as VERSION
-from ert_statoil.snapwell import snap, tryFloat
+from snapwell.snapconfig import SnapConfig
+from snapwell import __version__ as VERSION, snap, tryFloat
 
 
 def exit_with_usage(msg=None, exit_status=0):
