@@ -192,7 +192,7 @@ class WellPath:
         if not 0 <= idx < rs:
             raise IndexError("row index out of range, 0 <= idx < %d" % rs)
 
-        if isinstance(col, (int, long)):
+        if isinstance(col, (int)):
             if not 0 <= col < cs:
                 raise IndexError("column index out of range, 0 <= col < %d" % cs)
             col = self._headers[col]
