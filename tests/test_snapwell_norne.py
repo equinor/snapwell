@@ -9,22 +9,27 @@ from snapwell import WellPath
 
 
 class TestSnapwellProgram(TestCase):
+    """
+    This tests the installed version of snapwell, so will fail if not installed.
+    """
+
     def setUp(self):
         self.testDataFolder = os.path.join(
-            TestCase.PROJECT_ROOT, "testdata", "snapwell", "norne"
+            TestCase.PROJECT_ROOT, "tests", "testdata", "snapwell", "norne"
         )
-        self.snapwellprogram = os.path.join(TestCase.PROJECT_ROOT, "bin/snapwell")
+        self.snapwellprogram = "snapwell"
         self.norneTestEdgeWellPath = os.path.join(
             self.testDataFolder, "norne-test-1-edge.w"
         )
 
-    @pytest.mark.xfail(reason="Does not pass, need to figure out why")
     def test_snapwell_invalid_arg_throws(self):
         with TestAreaContext("Run_snapwell_invalid_arg_throws"):
             with self.assertRaises(subprocess.CalledProcessError):
                 subprocess.check_call([self.snapwellprogram, "no_such_file.sc"])
 
-    @pytest.mark.xfail(reason="Does not pass, need to figure out why")
+    @pytest.mark.xfail(
+        reason="Fails because of missing Norne test data, see write_snap_config_and_run"
+    )
     def test_snapwell_well_ok(self):
         with TestAreaContext("Run_snapwell_valid_arg_exit_ok"):
             config_file_name = "norne-reg-test.sc"
