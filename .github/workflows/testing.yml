@@ -2,10 +2,6 @@ name: CI
 
 on: [pull_request]
 
-env:
-  INSTALL_DIR: ${{ github.workspace }}/install
-  ERT_SHOW_BACKTRACE: 1
-
 jobs:
   tests:
     name: "Python ${{ matrix.python-version }}"
@@ -15,29 +11,12 @@ jobs:
         python-version: ["3.6", "3.7", "3.8"]
 
     steps:
-      - uses: "actions/checkout@v2"
-      - uses: "actions/setup-python@v2"
+      - uses: actions/checkout@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: "${{ matrix.python-version }}"
-
-      - name: Setup environment
-        run: |
-          echo "::add-path::${{ env.INSTALL_DIR}}/bin"
-          echo "::set-env name=LD_LIBRARY_PATH::${{ env.INSTALL_DIR }}/lib:${{ env.INSTALL_DIR }}/lib64"
-          echo "::set-env name=PYTHONPATH::${{ env.INSTALL_DIR }}/lib/python${{ matrix.python-version }}/site-packages:${{ env.INSTALL_DIR }}/lib/python${{ matrix.python-version }}/dist-packages"
-      - name: Install ERT and dependencies
-        run: |
-          git clone --branch master --depth 1 https://github.com/equinor/ert
-          source ert/.libres_version
-          git clone --branch $LIBRES_VERSION --depth 1 https://github.com/equinor/libres
-          source libres/.libecl_version
-          git clone --branch $LIBECL_VERSION --depth 1 https://github.com/equinor/libecl
-          bash ert/.build_install.sh libecl
-          bash ert/.build_install.sh libres
-          pip install ert/
-      - name: "Install snapwell"
-        run: |
-            pip install -r dev-requirements.txt
-            pip install .
-      - name: "Run tests for ${{ matrix.python-version }}"
-        run: python -m pytest tests/
+          python-version: ${{ matrix.python-version }}
+      - name: Install tox
+        run: pip install tox tox-gh-actions
+      - name: Test with tox
+        run: tox
