@@ -50,7 +50,6 @@ class SnapConfigTest(TestCase):
         self.assertEqual(datetime(2022, 1, 1), snap.date(0))
         self.assertEqual(datetime(2019, 5, 1), snap.date(1))
 
-    @pytest.mark.xfail(reason="Does not pass, need to figure out why")
     def test_ParseLOGS(self):
         # Test default values
         snap = SnapConfig.parse(join(self._base, "test-full.sc"))
@@ -72,7 +71,6 @@ class SnapConfigTest(TestCase):
         snap.addLogKeyword(log_kw)
         self.assertTrue(log_kw in snap.logKeywords())
 
-    @pytest.mark.xfail(reason="Does not pass, need to figure out why")
     def test_ParseConfFull(self):
         # Test default values
         snap_def = SnapConfig.parse(join(self._base, "test.sc"))
@@ -120,7 +118,6 @@ class SnapConfigTest(TestCase):
         self.assertTrue(snap.overwrite())
         self.assertEqualPaths(self._ecl_base, snap.output())
 
-    @pytest.mark.xfail(reason="Does not pass, need to figure out why")
     def test_ParseSettings(self):
         snap_path = join(self._base, "test-full.sc")
         snap = SnapConfig.parse(abspath(snap_path))
@@ -156,7 +153,6 @@ class SnapConfigTest(TestCase):
         self.assertEqual(wp.depthType(), "MD")
         self.assertEqual(wp.windowDepth(), 1884)
 
-    @pytest.mark.xfail(reason="Does not pass, need to figure out why")
     def test_OwcDefinition(self):
         # test-full has OWC_DEFINITION SGAS 0.31415
         snap_path = join(self._base, "test-full.sc")
