@@ -33,10 +33,9 @@
 
 
 """
+from pkg_resources import get_distribution, DistributionNotFound
 
 __name__ = "snapwell"
-__version__ = "1.0.0"
-
 __author__ = "PG Drange, K Flikka, and KW Kongsvik"
 __email__ = "pgdr@statoil.com"
 __copyright__ = "Copyright 2016, Statoil ASA"
@@ -58,3 +57,8 @@ from .snap_utils import Inf, Nan, roundAwayFromEven
 from .snap_utils import finiteFloat, tryFloat, close, dist
 from .snap_utils import findRestartStep, findKeyword, enterSnapMode
 from .snap_utils import parse_date
+
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    __version__ = "0.0.0"
