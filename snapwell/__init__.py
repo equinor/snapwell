@@ -44,12 +44,6 @@ __maintainer__ = "GBS IT SI SIB"
 __status__ = "Prototype"
 __credits__ = ["PG Drange", "K Flikka", "KW Kongsvik"]
 
-try:
-    import res
-    import ecl
-except ImportError as err:
-    exit("snapwell needs ert {}".format(err))
-
 from .wellpath import WellPath
 from .snapconfig import SnapConfig
 from .snapecl import snap
