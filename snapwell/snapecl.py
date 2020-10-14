@@ -227,6 +227,21 @@ def snap(
             doprint("WARNING: PERMX requested, but no INIT.  Ignoring keyword PERMX")
             keywords = [kw for kw in keywords if kw != "PERMX"]
 
+    c_owc_offset = wp.owcOffset()
+    if c_owc_offset is None:
+        c_owc_offset = owc_offset
+    else:
+        print("     \t Overriding global OWC_OFFSET.  Using value %.2f" % c_owc_offset)
+
+    c_owc_definition = wp.owcDefinition()
+    if c_owc_definition is None:
+        c_owc_definition = owc_definition[1]
+    else:
+        print(
+            "     \t Overriding global OWC_DEFINITION.  Using value %.2f"
+            % c_owc_definition
+        )
+
     # pick out swat/sgas/etc info for given step
     owc_kw = findKeyword(owc_definition[0], rest, date)
 
@@ -253,6 +268,7 @@ def snap(
     if "SGAS" in keywords or "SOIL" in keywords:
         sgas = findKeyword("SGAS", rest, date)
 
+    snapped_idx = 0
     for idx in range(len(wp)):
         point = wp[idx]
         x = point[0]
@@ -278,6 +294,7 @@ def snap(
         #          potentially want to put the well (eg 0.5m above owc_exact).
         #
         if snap_mode:
+            snapped_idx += 1
             try:
                 # findOwc returns owc, cell_column and index (in col) of cell
                 owc_exact, new_tvd = findOwc(
@@ -286,8 +303,8 @@ def snap(
                     x,
                     y,
                     z,
-                    thresh=owc_definition[1],
-                    owc_offset=owc_offset,
+                    thresh=c_owc_definition,
+                    owc_offset=c_owc_offset,
                 )
             except ValueError as err:
                 doprint("Warning: %s" % err)
@@ -305,9 +322,10 @@ def snap(
                 (x, y), (x2, y2)
             )  # the projected distance between prev point and this
             prev_z = prev_wp[2]
-            zp = prev_z + d * delta  # previous z plus  max elevation
-            zm = prev_z - d * delta  # previous z minus max elevation
-            z_range = (min(zp, zm), max(zp, zm))
+            if snapped_idx > 1:
+                zp = prev_z + d * delta  # previous z plus  max elevation
+                zm = prev_z - d * delta  # previous z minus max elevation
+                z_range = (min(zp, zm), max(zp, zm))
             new_tvd = roundAwayFromEven(min(max(new_tvd, z_range[0]), z_range[1]))
 
         diff = abs(z - new_tvd)

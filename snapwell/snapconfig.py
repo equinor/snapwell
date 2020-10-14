@@ -23,8 +23,8 @@ from ecl.eclfile import EclFile
 from ecl.grid import EclGrid
 from res.config import ContentTypeEnum, ConfigParser
 
+from .snap_utils import Inf, parse_date
 from .wellpath import WellPath
-from .snap_utils import read_config, parse_date, Inf, Nan
 
 
 class SnapConfig:
@@ -62,7 +62,7 @@ class SnapConfig:
         m["wellpath"] = self._wellpath_config
         return "snap: " + str(m)
 
-    def append(self, elt):
+    def _append(self, elt):
         """Append an elt=(fname, date) pair to wellpath.  In this setting, elt[0] should
         be a string that is a filepath to a wellpath and elt[1] should be
         datetime, corresponding to the restart time of this wellpath.
@@ -145,6 +145,10 @@ class SnapConfig:
                 "Configuring depth: %s [%s]"
                 % (str(wp.windowDepth()), str(wp.depthType()))
             )
+
+        wp.setOwcDefinition(self.igetOwcDefinition(idx))
+        wp.setOwcOffset(self.igetOwcOffset(idx))
+
         return wp
 
     def filename(self, idx):
@@ -155,16 +159,33 @@ class SnapConfig:
         """Return date of idx'th wellpath."""
         return self._wellpath_config[idx][1]
 
+    def igetOwcDefinition(self, idx):
+        """Returns the OWC_DEFINITION for wp idx if set, or None"""
+        key = "OWC_DEFINITION"
+        if key in self._wellpath_config[idx][2]:
+            return self._wellpath_config[idx][2][key]
+        return None
+
+    def igetOwcOffset(self, idx):
+        """Returns the OWC_OFFSET for wp idx if set, or None"""
+        key = "OWC_OFFSET"
+        if key in self._wellpath_config[idx][2]:
+            return self._wellpath_config[idx][2][key]
+        return None
+
     def depthType(self, idx):
         """Return depth type (MD/TVD) of idx'th wellpath or None if not set."""
-        if len(self._wellpath_config[idx]) == 4:
-            return self._wellpath_config[idx][2]
+        if "MD" in self._wellpath_config[idx][2]:
+            return "MD"
+        if "TVD" in self._wellpath_config[idx][2]:
+            return "TVD"
         return None
 
     def windowDepth(self, idx):
         """Return depth of idx'th wellpath or -inf if not set."""
-        if len(self._wellpath_config[idx]) == 4:
-            return self._wellpath_config[idx][3]
+        dt = self.depthType(idx)
+        if dt:
+            return self._wellpath_config[idx][2][dt]
         return -Inf
 
     def gridFile(self):
@@ -337,20 +358,8 @@ class SnapConfig:
                 )
 
             fname = tryGetPath(content, "WELLPATH", i, 0)
+
             date_str = tryGet(content, "WELLPATH", i, 1)
-
-            if num_tokens > 2 and num_tokens != 4:
-                raise ValueError(
-                    "WELLPATH format error.  Need 2 or 4 tokens, got %d tokens: %s"
-                    % (num_tokens, str(wp_line))
-                )
-
-            depth_type = None
-            depth = -1
-            if num_tokens == 4:
-                depth_type = tryGet(content, "WELLPATH", i, 2)
-                depth = tryGetFloat(content, "WELLPATH", i, 3)
-
             date = None
             try:
                 date = parse_date(date_str)
@@ -361,10 +370,30 @@ class SnapConfig:
                     'Could not read date from wellpath %d.  Got date string "%s".'
                     % (i + 1, str(date_str))
                 )
-            if depth_type:
-                s.append((fname, date, depth_type, depth))
-            else:
-                s.append((fname, date))
+
+            if num_tokens % 2 != 0:
+                raise ValueError(
+                    "WELLPATH format error.  Need an even number of tokens, got %d tokens: %s"
+                    % (num_tokens, str(wp_line))
+                )
+            settings = {}
+            # WELLPATH /path/to/file.w 1996-01-01 MD 134 OWC_DEFINITION 0.3 OWC_OFFSET 0.1
+            for idx in range(2, len(wp_line), 2):
+                settings_key = tryGet(content, "WELLPATH", i, idx)
+                settings_val = tryGetFloat(content, "WELLPATH", i, idx + 1)
+                if settings_key not in settings and settings_val is not None:
+                    settings[settings_key] = settings_val
+                else:
+                    logging.warning(
+                        "Failed to retrieve key/value from wellpath %d: %s %s"
+                        % (
+                            i + 1,
+                            content["WELLPATH"][i][idx],
+                            content["WELLPATH"][i][idx + 1],
+                        )
+                    )
+
+            s._append((fname, date, settings))
         return s
 
 
