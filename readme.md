@@ -139,3 +139,71 @@ We safely ignore all but the three first numbers in each row (actually, only x
 and y are really interesting).
 
 * UTM is Universal Transverse Mercator coordinate system
+
+## Run tests
+[tox](https://tox.readthedocs.io/en/latest/) is used as the test facilitator,
+to run the full test suite:
+
+```sh
+# Test
+pip install tox
+tox
+```
+
+or to run it for a particular Python version (in this case Python 3.7):
+
+```sh
+# Test
+pip install tox
+tox -e py37
+```
+
+or to run it for a the current Python version on PATH:
+
+```sh
+# Test
+pip install tox
+tox -e py
+```
+
+[pytest](https://docs.pytest.org/en/latest/) is used as the test runner, so for quicker
+iteration it is possible to run:
+
+```sh
+# Test
+pytest
+```
+
+this requires that the `pytest` is installed.
+
+```sh
+# Install pytest
+pip install pytest
+```
+
+[pre-commit](https://pre-commit.com/) is used to comply with the formatting standards.
+The complete formatting tests can be run with:
+
+```sh
+pip install tox
+tox -e style
+```
+
+See `.pre-commit-config.yaml` for the complete steps.
+
+[pre-commit](https://pre-commit.com/) can also provide git hooks to run on every commit
+to avoid commiting with formatting errors. This will only run on the diff so is quite fast.
+To configure this, run:
+
+```sh
+pip install pre-commit
+pre-commit install
+```
+
+After this the hook will run on every commit.
+
+If you would like to remove the hooks, run:
+
+```sh
+pre-commit uninstall
+```
