@@ -1,5 +1,3 @@
-#  Copyright (C) 2016  Statoil ASA, Norway.
-#
 #  This file is part of Snapwell.
 #
 #  Snapwell is free software: you can redistribute it and/or modify it under the
