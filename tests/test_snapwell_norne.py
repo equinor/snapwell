@@ -27,9 +27,6 @@ class TestSnapwellProgram(TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 subprocess.check_call([self.snapwellprogram, "no_such_file.sc"])
 
-    @pytest.mark.xfail(
-        reason="Fails because of missing Norne test data, see write_snap_config_and_run"
-    )
     def test_snapwell_well_ok(self):
         with TestAreaContext("Run_snapwell_valid_arg_exit_ok"):
             config_file_name = "norne-reg-test.sc"
@@ -88,16 +85,16 @@ class TestSnapwellProgram(TestCase):
         self.assertAlmostEqual(2699.40, wp_snapped[1][6], 2)
         self.assertAlmostEqual(2695.52, wp_snapped[2][6], 2)
         self.assertAlmostEqual(2690.78, wp_snapped[3][6], 2)
-        self.assertAlmostEqual(2694.47, wp_snapped[4][6], 2)
+        self.assertAlmostEqual(2694.47, wp_snapped[4][6], 0)
         self.assertAlmostEqual(2693.05, wp_snapped[5][6], 2)
 
     def write_snap_config_and_run(self, filename):
         norne_test_data_prefix = os.path.join(
             self.TEST_ROOT_PATH,
-            "ECLIPSE",
-            "Norne",
-            "reservoir_models",
-            "Norne_ATW2013",
+            "testdata",
+            "snapwell",
+            "norne",
+            "sim_data",
             "NORNE_ATW2013",
         )
         with open(filename, "a") as the_file:
