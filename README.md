@@ -10,18 +10,11 @@
     See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
     for more details.
 
-# Usage
+# Installation and usage
 
-Snapwell requires an installation of [ert](https://github.com/Ensembles/ert) to
-function.  Ert provides the necessary library to read Eclipse grids and restart
-files.
+Snappwell is available on [pypi](https://pypi.org/project/snapwell/) and can be
+installed using `pip install snapwell`
 
-Make sure to have snapwell in your Python path:
-
-    you@host:~$ git clone https://github.com/Statoil/snapwell
-    you@host:~$ export PYTHONPATH=snapwell:$PYTHONPATH
-    you@host:~$ python
-    >>> import snapwell
 
 # On snapwell
 
@@ -98,9 +91,6 @@ Example:
     WELLPATH   case1/SIMULATION_WELL_E_f.txt  2022        MD      2558.5
     WELLPATH   case1/SIMULATION_WELL_E_m.txt  2022        MD      2300.0
     WELLPATH   case1/SIMULATION_WELL_E_n.txt  2022-12-24
-
-
-
 
 
 
