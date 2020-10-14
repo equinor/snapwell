@@ -41,6 +41,8 @@ class WellPath:
         self._rkb = (0.0, 0.0, 0.0)
         self._depthtype = None
         self._windowdepth = -Inf
+        self._owc_definition = None
+        self._owc_offset = None
         if filename and len(filename) > 3 and filename[-3:] == ".sc":
             print(
                 "Warning:  WellPath file extension is .sc.  Potentially a Snapwell config file."
@@ -89,6 +91,18 @@ class WellPath:
 
     def setWindowDepth(self, depth):
         self._windowdepth = float(depth)
+
+    def owcDefinition(self):
+        return self._owc_definition
+
+    def owcOffset(self):
+        return self._owc_offset
+
+    def setOwcDefinition(self, val):
+        self._owc_definition = val
+
+    def setOwcOffset(self, val):
+        self._owc_offset = val
 
     def addColumn(self, header, data=None):
         if not data:

@@ -133,7 +133,7 @@ def enterSnapMode(mode, wp, idx):
         return True
     t = wp.depthType()
 
-    return wp[t][idx] >= wp.windowDepth()
+    return wp[t][idx] > wp.windowDepth()
 
 
 def finiteFloat(elt):
