@@ -1,10 +1,11 @@
 import os
 import unittest
-from datetime import datetime
+from datetime import date
 from os.path import abspath, join
 from unittest.mock import MagicMock
 
 import pytest
+import yaml
 from ecl.eclfile import EclFile
 
 # utils
@@ -12,17 +13,11 @@ from snapwell import (
     SnapConfig,
     findKeyword,
     findRestartStep,
-    parse_date,
     roundAwayFromEven,
     tryFloat,
 )
 
 from .testcase import TestCase
-
-
-def test_parse_not_a_date():
-    with pytest.raises(ValueError, match="datetime string on the form"):
-        parse_date("Not a date")
 
 
 def test_parse_not_a_float():
@@ -52,19 +47,19 @@ class SnapwellUtilTest(TestCase):
     def test_date(self):
         rfname = os.path.join(self.TEST_ROOT_PATH, "testdata/eclipse/SPE3CASE1.UNRST")
         rfile = EclFile(rfname)
-        step = findRestartStep(rfile, parse_date("1996-01-01"))
+        step = findRestartStep(rfile, date(1996, 1, 1))
         self.assertEqual(0, step)
 
-        step = findRestartStep(rfile, parse_date("2021-01"))
+        step = findRestartStep(rfile, date(2021, 1, 1))
         self.assertEqual(4, step)
 
-        step = findRestartStep(rfile, parse_date("2028-01-29"))
+        step = findRestartStep(rfile, date(2028, 1, 29))
         self.assertEqual(12, step)
 
-        step = findRestartStep(rfile, parse_date("2028-06"))
+        step = findRestartStep(rfile, date(2028, 6, 1))
         self.assertEqual(12, step)
 
-        step = findRestartStep(rfile, parse_date("2030"))
+        step = findRestartStep(rfile, date(2030, 1, 1))
         self.assertEqual(13, step)
 
     def test_rounding(self):
@@ -103,38 +98,28 @@ class SnapwellTest(TestCase):
         """Unit test assert equal paths"""
         self.assertEqual(abspath(p1), abspath(p2))
 
-    def test_BasicConf(self):
-        p = SnapConfig("", "")
-        p.setDeltaZ(1.1)
-        self.assertEqual(1.1, p.deltaZ())
-        p.setOwcOffset(3.3)
-        self.assertEqual(3.3, p.owcOffset())
-
-        p.setOverwrite(True)
-        self.assertTrue(p.overwrite())
-        p.setOverwrite(False)
-        self.assertFalse(p.overwrite())
-
-        p.setOutput("snapout")
-        self.assertEqual("snapout", p.output())
-
     def test_ParseRegression(self):
-        snap_path = join(self._base, "test.sc")
-        snap = SnapConfig.parse(abspath(snap_path))
+        snap_path = join(self._base, "test.yaml")
+        snap = None
+        with open(snap_path) as config_file:
+            config_dict = yaml.safe_load(config_file)
+            snap = SnapConfig(**config_dict)
+
+        snap.set_base_path(self._base)
 
         gridfile = join(self._ecl_base, "SPE3CASE1.EGRID")
-        self.assertEqualPaths(gridfile, snap.gridFile())
+        self.assertEqualPaths(gridfile, snap.grid_file)
 
         restartfile = join(self._ecl_base, "SPE3CASE1.UNRST")
-        self.assertEqualPaths(restartfile, snap.restartFile())
-        self.assertEqual(1, len(snap))
+        self.assertEqualPaths(restartfile, snap.restart_file)
+        self.assertEqual(1, len(snap.wellpath_files))
 
-        wellpath = snap[0]
-        self.assertEqualPaths(join(self._base, "well1.w"), wellpath[0])
-        self.assertEqual(datetime(2025, 1, 1), wellpath[1])
+        wellpath = snap.wellpath_files[0]
+        self.assertEqualPaths(join(self._base, "well1.w"), wellpath.well_file)
+        self.assertEqual(date(2025, 1, 1), wellpath.date)
 
-        self.assertIsNotNone(snap.getGrid())
-        self.assertIsNotNone(snap.getRestart())
+        self.assertIsNotNone(snap.grid)
+        self.assertIsNotNone(snap.restart)
 
 
 if __name__ == "__main__":

@@ -20,9 +20,11 @@ import warnings
 from os import makedirs, path
 from time import time
 
+import yaml
+
 from snapwell import __version__ as VERSION
 from snapwell import snap, tryFloat
-from snapwell.snapconfig import SnapConfig
+from snapwell.snapconfig import OwcDefinition, SnapConfig
 
 
 class DuplicateFilter(logging.Filter):
@@ -73,6 +75,8 @@ class SnapwellRunner:
         self.resinsight = resinsight
 
     def run_and_write(self, wp, wp_date):
+        if not self.config.output_dir.exists():
+            makedirs(str(self.config.output_dir))
         try:
             # call to main algorithm
             snap(
@@ -80,16 +84,14 @@ class SnapwellRunner:
                 self.grid,
                 self.restart,
                 wp_date,
-                owc_offset=self.config.owcOffset(),
                 permx_kw=self.permx,
-                keywords=self.config.logKeywords(),
-                delta=self.config.deltaZ(),
-                owc_definition=self.config.owcDefinition(),
+                owc_offset=self.config.owc_offset,
+                keywords=self.config.log_keywords,
+                delta=self.config.delta_z,
+                owc_definition=self.config.owc_definition,
             )
             # write wellpath to file
-            rows = wp.write(
-                overwrite=self.config.overwrite(), resinsight=self.resinsight
-            )
+            rows = wp.write(overwrite=self.config.overwrite, resinsight=self.resinsight)
             logging.info("Wrote %d rows to %s.out", rows, wp.file_name)
             # done with this wellpath
 
@@ -103,14 +105,14 @@ class SnapwellRunner:
 
     def main_loop(self):
         num_snaps = len(self.wellpaths)
-        logging.info("delta_z    = %.3f", self.config.deltaZ())
-        logging.info("owc_offset = %.3f", self.config.owcOffset())
-        owc_def = self.config.owcDefinition()
-        logging.info("owc_defini = %.3f (%s)", owc_def[1], owc_def[0])
-        logging.info("output     = %s", self.config.output())
+        logging.info("delta_z    = %.3f", self.config.delta_z)
+        logging.info("owc_offset = %.3f", self.config.owc_offset)
+        owc_def = self.config.owc_definition
+        logging.info("owc_defini = %.3f (%s)", owc_def.value, owc_def.keyword)
+        logging.info("output     = %s", self.config.output_dir)
         success = True
         for i, wp in enumerate(self.wellpaths):
-            wp_date = self.config.date(i)
+            wp_date = self.config.wellpath_files[i].date
             sep = "=" * 79
             logging.info("\n\n%s", sep)
             logging.info("%d/%d \t Snapping %s", i + 1, num_snaps, wp.well_name)
@@ -134,81 +136,45 @@ class SnapwellApp:
         snap_conf = args.config
 
         if args.owc_offset:
-            snap_conf.setOwcOffset(args.owc_offset)
+            snap_conf.owc_offset = args.owc_offset
         if args.output:
             outpath = path.abspath(args.output)
             if path.isfile(outpath):
                 self.exit_with_usage(
                     "Output path is an existing file. Delete it or choose a different output path."
                 )
-            if not path.exists(outpath):
-                makedirs(outpath)
-            snap_conf.setOutput(outpath)
+            snap_conf.output_dir = outpath
         if args.overwrite:
-            snap_conf.setOverwrite(args.overwrite)
+            snap_conf.overwrite = args.overwrite
         if args.owc_definition:
-            snap_conf.setOwcDefinition(args.owc_definition)
+            snap_conf.owc_definition = args.owc_definition
         if args.owc_offset:
-            snap_conf.setOwcOffset(args.owc_offset)
+            snap_conf.owc_offset = args.owc_offset
         if args.delta:
-            snap_conf.setDeltaZ(args.delta)
+            snap_conf.delta_z = args.delta
         return snap_conf
 
-    def load_wellpaths(self, config):
-        logging.info("Loading %d wells", len(config))
-
-        wellpaths = []
-        for i in range(len(config)):
-            fname = config.filename(i)
-            logging.info(fname, end=" ... ")
-            wp = config.getWellpath(i)
-            logging.info("(%d points, %d logs)", len(wp), len(wp.headers))
-            wellpaths.append(wp)
-            logging.info("done")
-        return wellpaths
-
     def load_restart_file(self, config):
-        logging.info("Loading restart %s", config.restartFile())
-        restart = None
-        restartFile = config.restartFile()
+        logging.info("Loading restart %s", config.restart_file)
         try:
-            restart = config.getRestart()
+            return config.restart
         except Exception as err:
-            logging.warning("supplied RESTART file not loaded: %s", err)
-
-        if not restart:
-            if not path.isfile(restartFile):
-                self.exit_with_usage("Missing restart: No such file %s." % restartFile)
-            else:
-                self.exit_with_usage(
-                    "Missing restart: Failed to read restart file %s." % restartFile
-                )
-        return restart
+            logging.error("supplied RESTART file not loaded: %s", err)
 
     def load_grid_file(self, config):
-        logging.info("Loading grid %s", config.gridFile())
-        grid = None
-        gridFile = config.gridFile()
+        logging.info("Loading grid %s", config.grid_file)
         try:
-            grid = config.getGrid()
+            return config.grid
         except Exception as err:
-            logging.warning("supplied GRID file not loaded: %s", err)
-        if not grid:
-            if not path.isfile(gridFile):
-                self.exit_with_usage("Missing grid: No such file %s." % gridFile)
-            else:
-                self.exit_with_usage(
-                    "Missing grid: Failed to read grid file %s." % gridFile
-                )
-        return grid
+            logging.error("supplied GRID file not loaded: %s", err)
 
     def load_permx(self, config):
         init = None
-        if "PERMX" in config.logKeywords():
-            if config.initFile():
-                logging.info("Loading INIT %s", config.initFile())
+        if "PERMX" in config.log_keywords:
+            if config.init_file:
+                logging.info("Loading INIT %s", config.init_file)
                 try:
-                    init = config.getInit()
+                    init = config.init
                 except Exception as err:
                     self.exit_with_usage(f"could not load supplied INIT file: {err}")
 
@@ -220,7 +186,7 @@ class SnapwellApp:
                 self.exit_with_usage(
                     f"Could not get permx keyword from init file: {err}"
                 )
-        if config.initFile():
+        if config.init_file:
             logging.warning("Init file set, but PERMX keyword not requested, ignoring.")
         return None
 
@@ -240,14 +206,18 @@ class SnapwellApp:
                     "A Snapwell config file is needed.  Provide full path to config file."
                 )
 
-            if not conf_file[-3:] == ".sc":
-                logging.warning(
-                    "It is highly recommended that a Snapwell config file has file extension .sc"
-                )
             logging.info("Parsing config file %s", conf_file)
             try:
-                return SnapConfig.parse(conf_file)
-            except ValueError as err:
+                with open(conf_file) as config_stream:
+                    config_dict = yaml.safe_load(config_stream)
+                    if not isinstance(config_dict, dict):
+                        raise ValueError(
+                            f"Wrong format in config file, expected root dictionary, but got {type(config_dict)}"
+                        )
+                    conf = SnapConfig(**config_dict)
+                    conf.set_base_path(path.dirname(conf_file))
+                    return conf
+            except Exception as err:
                 raise argparse.ArgumentTypeError(
                     f"Error while parsing snapwell config file: {err}"
                 ) from err
@@ -273,7 +243,7 @@ class SnapwellApp:
                 raise argparse.ArgumentTypeError(
                     f"owc definition is malform: could not parse key word {odkw}"
                 )
-            return odkw.upper(), odval
+            return OwcDefinition(odkw.upper(), odval)
 
         parser = ParserPrintHelp(
             prog=prog, description="Snapwell --- a wellpath optimization program."
@@ -329,7 +299,7 @@ class SnapwellApp:
             self.load_grid_file(config),
             self.load_restart_file(config),
             self.load_permx(config),
-            self.load_wellpaths(config),
+            config.wellpaths,
             args.resinsight,
         )
 

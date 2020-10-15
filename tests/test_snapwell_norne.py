@@ -27,11 +27,11 @@ class TestSnapwellProgram(TestCase):
     def test_snapwell_invalid_arg_throws(self):
         with TestAreaContext("Run_snapwell_invalid_arg_throws"):
             with self.assertRaises(subprocess.CalledProcessError):
-                subprocess.check_call([self.snapwellprogram, "no_such_file.sc"])
+                subprocess.check_call([self.snapwellprogram, "no_such_file.yaml"])
 
     def test_snapwell_well_ok(self):
         with TestAreaContext("Run_snapwell_valid_arg_exit_ok"):
-            config_file_name = "norne-reg-test.sc"
+            config_file_name = "norne-reg-test.yaml"
             self.write_snap_config_and_run(config_file_name)
             self.assertTrue(os.path.isfile(config_file_name))
 
@@ -151,16 +151,18 @@ class TestSnapwellProgram(TestCase):
             "NORNE_ATW2013",
         )
         with open(filename, "a") as the_file:
-            the_file.write("GRID       " + norne_test_data_prefix + ".EGRID\n")
-            the_file.write("RESTART    " + norne_test_data_prefix + ".UNRST\n")
-            the_file.write("INIT       " + norne_test_data_prefix + ".INIT\n")
-            the_file.write("OUTPUT     snap_output\n")
-            the_file.write("OVERWRITE  False\n")
+            the_file.write("grid_file: '" + norne_test_data_prefix + ".EGRID'\n")
+            the_file.write("restart_file: '" + norne_test_data_prefix + ".UNRST'\n")
+            the_file.write("init_file: '" + norne_test_data_prefix + ".INIT'\n")
+            the_file.write("output_dir: 'snap_output'\n")
+            the_file.write("overwrite:  False\n")
+            the_file.write("wellpath_files:\n")
             the_file.write(
-                "WELLPATH " + self.norneTestEdgeWellPath + "            1998\n"
+                "  - {well_file: '"
+                + self.norneTestEdgeWellPath
+                + "', date: '1998-1-1'}\n"
             )
-            for kw in log_keywords:
-                the_file.write(f"LOG {kw}\n")
+            the_file.write(f"log_keywords: {log_keywords}\n")
 
         # Run the snapwell program
         self.assertEqual(0, subprocess.check_call([self.snapwellprogram, filename]))

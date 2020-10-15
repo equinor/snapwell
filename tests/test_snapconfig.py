@@ -1,170 +1,177 @@
+from datetime import date
+from os.path import dirname, join
+from pathlib import Path
+
 import pytest
-from datetime import datetime
-from os.path import join, abspath
-import unittest
+import yaml
 
-from .testcase import TestCase
-from snapwell import WellPath, SnapConfig, Inf
+from snapwell import Inf, SnapConfig
+
+testdata_path = join(dirname(__file__), "testdata")
+conf_path = join(testdata_path, "snapwell")
+eclipse_path = join(testdata_path, "eclipse")
 
 
-class SnapConfigTest(TestCase):
-    def setUp(self):
-        self._base = join(self.TEST_ROOT_PATH, "testdata/snapwell")
-        self._ecl_base = join(self.TEST_ROOT_PATH, "testdata/eclipse")
+def same_path(path1, path2):
+    return Path(path1).resolve() == Path(path2).resolve()
 
-    def assertEqualPaths(self, p1, p2):
-        """Unit test assert equal paths"""
-        self.assertEqual(abspath(p1), abspath(p2))
 
-    def test_FileNotFound(self):
-        snap = SnapConfig.parse(join(self._base, "nosuchwell.sc"))
-        wp_f = snap.filename(0)
-        with self.assertRaises(IOError):
-            WellPath.parse(wp_f)
+def test_parse_missing_grid():
+    with open(join(conf_path, "test-missing-grid.yaml")) as config_file:
+        config_dict = yaml.safe_load(config_file)
+    with pytest.raises(TypeError):
+        SnapConfig(**config_dict)
 
-    def test_ParseMissingGridOrRestart(self):
-        with self.assertRaises(ValueError):
-            SnapConfig.parse(join(self._base, "test-missing-grid.sc"))
-        with self.assertRaises(ValueError):
-            SnapConfig.parse(join(self._base, "test-missing-restart.sc"))
 
-    def test_ParseConf(self):
-        snap = SnapConfig.parse(join(self._base, "littered.sc"))
-        self.assertIsNone(snap.getInit())
+def test_parse_missing_restart():
+    with open(join(conf_path, "test-missing-restart.yaml")) as config_file:
+        config_dict = yaml.safe_load(config_file)
+    with pytest.raises(TypeError):
+        SnapConfig(**config_dict)
 
-        snapinit = SnapConfig.parse(join(self._base, "littered-w-init.sc"))
-        self.assertIsNotNone(snapinit.getInit())
-        self.assertEqualPaths(
-            join(self._ecl_base, "SPE3CASE1.INIT"), snapinit.initFile()
+
+def test_parse_without_init():
+    with open(join(conf_path, "no-init.yaml")) as config_file:
+        config_dict = yaml.safe_load(config_file)
+    conf = SnapConfig(**config_dict)
+    assert conf.init_file is None
+
+
+@pytest.fixture
+def init_config():
+    with open(join(conf_path, "with-init.yaml")) as config_file:
+        config_dict = yaml.safe_load(config_file)
+    return SnapConfig(**config_dict)
+
+
+def test_set_base_path(init_config):
+    init_config.set_base_path(conf_path)
+    assert same_path(join(eclipse_path, "SPE3CASE1.INIT"), init_config.init_file)
+    assert same_path(join(conf_path, "grid.EGRID"), init_config.grid_file)
+    assert same_path(join(conf_path, "restart.UNRST"), init_config.restart_file)
+
+
+def test_wellpath_content(init_config):
+    assert len(init_config.wellpath_files) == 2
+
+    init_config.set_base_path(conf_path)
+    assert same_path(join(conf_path, "well.w"), init_config.wellpath_files[0].well_file)
+    assert same_path(
+        join(conf_path, "well1.w"), init_config.wellpath_files[1].well_file
+    )
+    assert init_config.wellpath_files[0].date == date(2022, 1, 1)
+    assert init_config.wellpath_files[1].date == date(2019, 5, 1)
+
+
+@pytest.fixture
+def full_config():
+    with open(join(conf_path, "test-full.yaml")) as config_file:
+        config_dict = yaml.safe_load(config_file)
+    return SnapConfig(**config_dict)
+
+
+def test_full_config_values(full_config):
+    assert full_config.log_keywords == ["LENGTH", "TVD_DIFF", "OLD_TVD", "OWC", "PERMX"]
+    assert full_config.owc_offset == pytest.approx(0.88)
+    assert full_config.delta_z == pytest.approx(0.55)
+    assert full_config.overwrite
+
+
+def test_full_config_owc_definition(full_config):
+    assert full_config.owc_definition.keyword == "SGAS"
+    assert full_config.owc_definition.value == pytest.approx(0.31415)
+
+
+def test_full_config_set_base_path(full_config):
+    full_config.set_base_path(conf_path)
+    assert same_path(join(eclipse_path, "SPE3CASE1.EGRID"), full_config.grid_file)
+    assert same_path(join(eclipse_path, "SPE3CASE1.UNRST"), full_config.restart_file)
+    assert same_path(join(eclipse_path, "SPE3CASE1.INIT"), full_config.init_file)
+    assert same_path(eclipse_path, full_config.output_dir)
+
+
+def test_full_config_wellpath_files_base_path(full_config):
+    full_config.set_base_path(conf_path)
+    assert same_path(join(conf_path, "well.w"), full_config.wellpath_files[0].well_file)
+    for i in range(1, 8):
+        assert same_path(
+            join(conf_path, f"well{i}.w"), full_config.wellpath_files[i].well_file
         )
 
-        gridpath = join(self._base, "grid.EGRID")
-        self.assertEqualPaths(gridpath, snap.gridFile())
 
-        restartpath = join(self._base, "a_restart_file.UNRST")
-        self.assertEqualPaths(restartpath, snap.restartFile())
-
-        self.assertEqual(2, len(snap))
-        wellpath = join(self._base, "well.w")
-        self.assertEqualPaths(wellpath, snap.filename(0))
-        self.assertEqual(datetime(2022, 1, 1), snap.date(0))
-        self.assertEqual(datetime(2019, 5, 1), snap.date(1))
-
-    def test_ParseLOGS(self):
-        # Test default values
-        snap = SnapConfig.parse(join(self._base, "test-full.sc"))
-        self.assertEqual(len(snap.logKeywords()), 5)
-        _logKeywords = ("LENGTH", "TVD_DIFF", "OLD_TVD", "OWC", "PERMX")
-
-        for i in range(len(_logKeywords)):
-            self.assertEqual(
-                _logKeywords[i],
-                snap.logKeywords()[i],
-                "Expected LOG keyword: %s, got: %s"
-                % (_logKeywords[i], snap.logKeywords()[i]),
-            )
-
-    def test_addKeyWord(self):
-        log_kw = "LENGTH"
-        snap = SnapConfig("", "")
-        self.assertFalse(snap.logKeywords())
-        snap.addLogKeyword(log_kw)
-        self.assertTrue(log_kw in snap.logKeywords())
-
-    def test_ParseConfFull(self):
-        # Test default values
-        snap_def = SnapConfig.parse(join(self._base, "test.sc"))
-        self.assertAlmostEqual(0.5, snap_def.owcOffset())
-        self.assertAlmostEqual(Inf, snap_def.deltaZ())  # Infinite delta z allowed
-
-        grid_fname = join(self._ecl_base, "SPE3CASE1.EGRID")
-        self.assertEqualPaths(grid_fname, snap_def.gridFile())
-
-        rest_fname = join(self._ecl_base, "SPE3CASE1.UNRST")
-        self.assertEqualPaths(rest_fname, snap_def.restartFile())
-
-        well1 = join(self._base, "well1.w")
-        self.assertEqualPaths(well1, snap_def.filename(0))
-        self.assertEqual(datetime(2025, 1, 1), snap_def.date(0))
-        self.assertIsNone(snap_def.getInit())
-        self.assertEqual(".", snap_def.output())
-        self.assertFalse(snap_def.overwrite())
-        with self.assertRaises(IndexError):
-            snap_def.filename(1)
-        with self.assertRaises(IndexError):
-            snap_def.date(1)
-
-        # Test parsing of all possible values
-        snap = SnapConfig.parse(join(self._base, "test-full.sc"))
-        self.assertAlmostEqual(0.88, snap.owcOffset())
-        self.assertAlmostEqual(0.55, snap.deltaZ())
-
-        self.assertEqualPaths(grid_fname, snap.gridFile())
-        self.assertEqualPaths(rest_fname, snap.restartFile())
-
-        init_fname = join(self._ecl_base, "SPE3CASE1.INIT")
-        self.assertEqualPaths(init_fname, snap.initFile())
-
-        well = join(self._base, "well.w")
-        self.assertEqualPaths(well, snap.filename(0))
-        # self.assertEqual(datetime(2025,03,31), snap.date(0))
-        self.assertEqualPaths(well1, snap.filename(1))
-        # self.assertEqual(datetime(2022,12,03), snap.date(1))
-        with self.assertRaises(IndexError):
-            snap_def.filename(2)
-        with self.assertRaises(IndexError):
-            snap_def.date(2)
-
-        self.assertTrue(snap.overwrite())
-        self.assertEqualPaths(self._ecl_base, snap.output())
-
-    def test_ParseSettings(self):
-        snap_path = join(self._base, "test-full.sc")
-        snap = SnapConfig.parse(abspath(snap_path))
-        well_fnames = ["well.w"] + ["well%d.w" % i for i in range(1, 8)]
-        self.assertEqual(len(well_fnames), len(snap))
-        depthtypes = (
-            None,
-            "TVD",
-            "MD",
-            "MD",
-            "MD",
-            None,
-            "MD",
-            "MD",
-        )  # see test-full.sc
-        depths = (-Inf, 2000.00, 158.20, 1680.00, 1680.00, -Inf, 1884, 4000)
-        for i in range(len(snap)):
-            self.assertEqual(depths[i], snap.windowDepth(i))
-            self.assertEqual(depthtypes[i], snap.depthType(i))
-
-        definition = (None, None, None, None, 0.71828, 0.1828, 0.828, 0.0)
-        for i in range(len(snap)):
-            self.assertEqual(definition[i], snap.igetOwcDefinition(i))
-
-        offset = (None, None, None, None, None, 0.5115, 0.115, None)
-        for i in range(len(snap)):
-            self.assertEqual(offset[i], snap.igetOwcOffset(i))
-
-        wp = snap.getWellpath(6)
-        # WELLPATH well6.w 2025-12-03 OWC_OFFSET 0.115 OWC_DEFINITION 0.828 MD 1884
-        self.assertEqual(wp.owc_definition, 0.828)
-        self.assertEqual(wp.owc_offset, 0.115)
-        self.assertEqual(wp.depth_type, "MD")
-        self.assertEqual(wp.window_depth, 1884)
-
-    def test_OwcDefinition(self):
-        # test-full has OWC_DEFINITION SGAS 0.31415
-        snap_path = join(self._base, "test-full.sc")
-        snap = SnapConfig.parse(abspath(snap_path))
-        self.assertEqual(2, len(snap.owcDefinition()))
-        self.assertEqual("SGAS", snap.owcDefinition()[0])
-        self.assertAlmostEqual(0.31415, snap.owcDefinition()[1])
-
-        snap.setOwcDefinition(("SWAT", 0.57721))
-        self.assertEqual("SWAT", snap.owcDefinition()[0])
-        self.assertAlmostEqual(0.57721, snap.owcDefinition()[1])
+def test_full_config_wellpath_depth_types(full_config):
+    expected = [None, "TVD", "MD", "MD", "MD", None, "MD", "MD"]
+    assert [wpf.depth_type for wpf in full_config.wellpath_files] == expected
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_full_config_wellpath_depths(full_config):
+    expected = [
+        -Inf,
+        pytest.approx(2000.00),
+        pytest.approx(158.20),
+        pytest.approx(1680.00),
+        pytest.approx(1680.00),
+        -Inf,
+        pytest.approx(1884),
+        pytest.approx(4000),
+    ]
+    assert [wpf.window_depth for wpf in full_config.wellpath_files] == expected
+
+
+def test_full_config_wellpath_owc_definitions(full_config):
+    expected = [
+        None,
+        None,
+        None,
+        None,
+        pytest.approx(0.71828),
+        pytest.approx(0.1828),
+        pytest.approx(0.828),
+        pytest.approx(0.0),
+    ]
+    assert [wpf.owc_definition for wpf in full_config.wellpath_files] == expected
+
+
+def test_full_config_wellpath_owc_offset(full_config):
+    expected = [
+        None,
+        None,
+        None,
+        None,
+        None,
+        pytest.approx(0.5115),
+        pytest.approx(0.115),
+        None,
+    ]
+    assert [wpf.owc_offset for wpf in full_config.wellpath_files] == expected
+
+
+def test_full_config_wellpath6_values(full_config):
+    wp = full_config.wellpath_files[6]
+    # WELLPATH well6.w 2025-12-03 OWC_OFFSET 0.115 OWC_DEFINITION 0.828 MD 1884
+    assert wp.owc_definition == pytest.approx(0.828)
+    assert wp.owc_offset == pytest.approx(0.115)
+    assert wp.depth_type == "MD"
+    assert wp.window_depth == pytest.approx(1884)
+
+
+@pytest.fixture
+def config():
+    with open(join(conf_path, "test.yaml")) as config_file:
+        config_dict = yaml.safe_load(config_file)
+    return SnapConfig(**config_dict)
+
+
+def test_config(config):
+    assert config.owc_offset == pytest.approx(0.5)
+    assert config.delta_z == Inf
+
+    config.set_base_path(conf_path)
+    assert same_path(join(eclipse_path, "SPE3CASE1.EGRID"), config.grid_file)
+    assert same_path(join(eclipse_path, "SPE3CASE1.UNRST"), config.restart_file)
+
+    assert same_path(join(conf_path, "well1.w"), config.wellpath_files[0].well_file)
+    assert config.init_file is None
+    assert date(2025, 1, 1) == config.wellpath_files[0].date
+    assert config.output_dir == Path(conf_path)
+    assert not config.overwrite
