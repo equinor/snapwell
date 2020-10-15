@@ -1,5 +1,5 @@
 from pathlib import Path
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def get_long_description() -> str:
@@ -11,12 +11,18 @@ setup(
     use_scm_version={"write_to": "snapwell/version.py"},
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    packages=["snapwell"],
+    packages=find_packages(include=["snapwell*"]),
     install_requires=["libecl", "equinor-libres"],
+    extras_require={
+        "ert-hooks": ["ensemble-reservoir-tool @ git+https://github.com/equinor/ert"]
+    },
     entry_points={
         "console_scripts": [
-            "snapwell=snapwell.snapwell_main:main",
-        ]
+            "snapwell_app=snapwell.snapwell_main:main",
+        ],
+        "ert": [
+            "snapwell=snapwell._ert_hooks._ert_hook",
+        ],
     },
     license="GPL-3.0",
     platforms="any",
@@ -35,4 +41,5 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     setup_requires=["setuptools_scm"],
+    include_package_data=True,
 )
