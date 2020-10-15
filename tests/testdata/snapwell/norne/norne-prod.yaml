@@ -1,0 +1,18 @@
+grid_file: "/d/proj/bg/enkf/ErtTestData/ECLIPSE/Norne/reservoir_models/Norne_ATW2013/NORNE_ATW2013.EGRID"
+restart_file: "/d/proj/bg/enkf/ErtTestData/ECLIPSE/Norne/reservoir_models/Norne_ATW2013/NORNE_ATW2013.UNRST"
+init_file: "/d/proj/bg/enkf/ErtTestData/ECLIPSE/Norne/reservoir_models/Norne_ATW2013/NORNE_ATW2013.INIT"
+
+output_dir: "../norne-prod-out"
+overwrite: True
+delta_z: 0.0167
+log_keywords: ["TVD_DIFF", "OWC", "SWAT", "SGAS", "SOIL"]
+
+
+owc_offset: 0.0
+owc_definition:
+    keyword: "SWAT"
+    value: 0.7
+
+wellpath_files:
+    - well_file: "norne-prod.w"
+      date: "2001-09-01"

@@ -16,6 +16,7 @@
 import logging
 
 from .snap_utils import Inf, Nan, dist, enterSnapMode, findKeyword, roundAwayFromEven
+from .snapconfig import OwcDefinition
 
 
 def _activeIdx(grid, i, j, k):
@@ -185,7 +186,7 @@ def snap(
     permx_kw=None,
     keywords=None,
     delta=Inf,
-    owc_definition=("SWAT", 0.7),
+    owc_definition=None,
 ):
     """Given a WellPath wp, an EclGrid grid, an EclFile (restart file) rest, and a
     datetime date, we snap the WellPath wp to fit OWC - offset, where OWC is
@@ -207,6 +208,10 @@ def snap(
 
     """
     c_owc_offset = wp.owc_offset
+
+    if owc_definition is None:
+        owc_definition = OwcDefinition("SWAT", 0.7)
+
     if c_owc_offset is None:
         c_owc_offset = owc_offset
     else:
@@ -214,7 +219,7 @@ def snap(
 
     c_owc_definition = wp.owc_definition
     if c_owc_definition is None:
-        c_owc_definition = owc_definition[1]
+        c_owc_definition = owc_definition.value
     else:
         logging.info(
             "Overriding global OWC_DEFINITION. Using value %.2f",
@@ -222,7 +227,7 @@ def snap(
         )
 
     # pick out swat/sgas/etc info for given step
-    owc_kw = findKeyword(owc_definition[0], rest, date)
+    owc_kw = findKeyword(owc_definition.keyword, rest, date)
 
     logs = {
         "TVD_DIFF": [],  # TVD_DIFF

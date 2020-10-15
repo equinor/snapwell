@@ -44,30 +44,6 @@ def strip_line(l):
     return l.strip()
 
 
-def parse_date(s):
-    """Returns a datetime string if input is either YYYY, YYYY-MM or YYYY-MM-DD."""
-    d = None
-    try:
-        d = datetime.strptime(s, "%Y-%m-%d")
-    except Exception:
-        pass
-    try:
-        d = datetime.strptime(s, "%Y-%m")
-    except Exception:
-        pass
-    try:
-        d = datetime.strptime(s, "%Y")
-    except Exception:
-        pass
-
-    if d is None:
-        raise ValueError(
-            "Provide a datetime string on the form YYYY-MM-DD, YYYY-MM, or YYYY, not %s"
-            % str(s)
-        )
-    return d
-
-
 def roundAwayFromEven(val):
     """Eclipse cannot deal with values close to even integers.  We
     (in)sanitize the value so that it always will be at least 0.1m away
@@ -89,7 +65,7 @@ def findRestartStep(restart, date):
     """Finds the last restart step in the given restart file before the given date."""
     # start at 1, since we return step - 1
     for step in range(1, restart.num_report_steps()):
-        new_date = restart.iget_restart_sim_time(step)  # step date
+        new_date = restart.iget_restart_sim_time(step).date()  # step date
         if new_date > date:
             return step - 1
 

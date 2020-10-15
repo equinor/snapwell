@@ -49,7 +49,6 @@ from .snapecl import snap
 from .snap_utils import Inf, Nan, roundAwayFromEven
 from .snap_utils import finiteFloat, tryFloat, close, dist
 from .snap_utils import findRestartStep, findKeyword, enterSnapMode
-from .snap_utils import parse_date
 
 try:
     __version__ = get_distribution(__name__).version

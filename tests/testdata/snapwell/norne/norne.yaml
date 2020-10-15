@@ -1,0 +1,14 @@
+grid_file: "NORNE_ATW2013.EGRID"
+restart_file: "NORNE_ATW2013.UNRST"
+init_file: "NORNE_ATW2013.INIT"
+
+output_dir: "../norsnap"
+overwrite: False
+# delta_z:     0.001
+# log_keywords: ["SWAT", "OWC", "ZDIFF"]
+
+wellpath_files:
+  - {well_file: "norne-well-B-2H.w", date: "1998-1-1"}
+  - {well_file: "norne-well-1.w", date: "2001-1-1"}
+  - {well_file: "norne-well-2.w", date: "2002-1-1"}
+  - {well_file: "norne-well-3.w", date: "2003-1-1"}

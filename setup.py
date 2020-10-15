@@ -1,5 +1,6 @@
 from pathlib import Path
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 
 def get_long_description() -> str:
@@ -12,7 +13,13 @@ setup(
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     packages=find_packages(include=["snapwell*"]),
-    install_requires=["libecl", "equinor-libres"],
+    install_requires=[
+        "libecl",
+        "equinor-libres",
+        "pydantic",
+        "dataclasses>=0.6;python_version<'3.7'",
+        "typing_extensions",
+    ],
     entry_points={
         "console_scripts": [
             "snapwell=snapwell.snapwell_main:main",

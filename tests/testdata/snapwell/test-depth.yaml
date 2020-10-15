@@ -1,0 +1,9 @@
+grid_file: "../eclipse/SPE3CASE1.EGRID"
+restart_file: "../eclipse/SPE3CASE1.UNRST"
+
+
+wellpath_files:
+ - well_file: "well1.w"
+   date: "2025-1-1"
+   depth_type: "MD"
+   window_depth: 1729

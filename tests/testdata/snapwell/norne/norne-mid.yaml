@@ -1,0 +1,12 @@
+grid_file: "NORNE_ATW2013.EGRID"
+restart_file: "NORNE_ATW2013.UNRST"
+init_file: "NORNE_ATW2013.INIT"
+
+output_dir: "norne-mid"
+overwrite: False
+delta_z: 0.003
+log_keywords: ["PERMX", "OWC", "TVD_DIFF"]
+
+wellpath_files:
+  - {well_file: "norne-test-1-mid.w", date: "1997-05-1"}
+  - {well_file: "norne-test-2-mid.w", date: "1998-01-1"}

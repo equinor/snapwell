@@ -1,0 +1,5 @@
+grid_file: "../eclipse/SPE3CASE1.EGRID"
+
+wellpath_files:
+    - well_file: "well1.w"
+      date: 2025
