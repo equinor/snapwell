@@ -65,30 +65,30 @@ class SnapwellRunner:
             rows = wp.write(
                 overwrite=self.config.overwrite(), resinsight=self.resinsight
             )
-            print("Wrote %d rows to %s.out" % (rows, wp.filename()))
+            logging.info("Wrote %d rows to %s.out", rows, wp.filename())
             # done with this wellpath
         except ValueError as err:
-            print("Error in well/grid/restart values: %s" % err)
+            logging.error("Error in well/grid/restart values: %s", err)
         except IOError as err:
-            print("Error while writing file: %s" % err)
+            logging.error("Error while writing file: %s", err)
 
     def main_loop(self):
         num_snaps = len(self.wellpaths)
-        print("delta_z    = %.3f" % self.config.deltaZ())
-        print("owc_offset = %.3f" % self.config.owcOffset())
+        logging.info("delta_z    = %.3f", self.config.deltaZ())
+        logging.info("owc_offset = %.3f", self.config.owcOffset())
         owc_def = self.config.owcDefinition()
-        print("owc_defini = %.3f (%s)" % (owc_def[1], owc_def[0]))
-        print("output     = %s" % self.config.output())
+        logging.info("owc_defini = %.3f (%s)", owc_def[1], owc_def[0])
+        logging.info("output     = %s", self.config.output())
         for i, wp in enumerate(self.wellpaths):
             wp_date = self.config.date(i)
             sep = "=" * 79
-            print("\n\n%s" % sep)
-            print("%d/%d \t Snapping %s" % (i + 1, num_snaps, wp.wellname()))
+            logging.info("\n\n%s", sep)
+            logging.info("%d/%d \t Snapping %s", i + 1, num_snaps, wp.wellname())
             start = time()
             self.run_and_write(wp, wp_date)
             stop = time()
             sec = round(stop - start, 2)
-            print("Operation took %s seconds" % str(sec))
+            logging.info("Operation took %s seconds", str(sec))
 
 
 class SnapwellApp:
@@ -124,26 +124,26 @@ class SnapwellApp:
         return snap_conf
 
     def load_wellpaths(self, config):
-        print("Loading %d wells" % (len(config)))
+        logging.info("Loading %d wells", len(config))
 
         wellpaths = []
         for i in range(len(config)):
             fname = config.filename(i)
-            print(fname, end=" ... ")
+            logging.info(fname, end=" ... ")
             wp = config.getWellpath(i)
-            print("(%d points, %d logs)" % (len(wp), len(wp.headers())), end=" ")
+            logging.info("(%d points, %d logs)", len(wp), len(wp.headers()))
             wellpaths.append(wp)
-            print("done")
+            logging.info("done")
         return wellpaths
 
     def load_restart_file(self, config):
-        print("Loading restart %s" % config.restartFile())
+        logging.info("Loading restart %s" % config.restartFile())
         restart = None
         restartFile = config.restartFile()
         try:
             restart = config.getRestart()
         except Exception as err:
-            warnings.warn(f"supplied RESTART file not loaded: {err}")
+            logging.warning("supplied RESTART file not loaded: %s", err)
 
         if not restart:
             if not path.isfile(restartFile):
@@ -155,13 +155,13 @@ class SnapwellApp:
         return restart
 
     def load_grid_file(self, config):
-        print("Loading grid %s" % config.gridFile())
+        logging.info("Loading grid %s" % config.gridFile())
         grid = None
         gridFile = config.gridFile()
         try:
             grid = config.getGrid()
         except Exception as err:
-            warnings.warn("supplied GRID file not loaded: %s" % err)
+            logging.warning("supplied GRID file not loaded: %s", err)
         if not grid:
             if not path.isfile(gridFile):
                 self.exit_with_usage("Missing grid: No such file %s." % gridFile)
@@ -174,14 +174,14 @@ class SnapwellApp:
     def load_init_file(self, config):
         init = None
         if config.initFile():
-            print("Loading INIT %s" % config.initFile())
+            logging.info("Loading INIT %s", config.initFile())
             try:
                 init = config.getInit()
             except Exception as err:
-                warnings.warn(f"supplied INIT file not loaded: {err}")
+                logging.warning("supplied INIT file not loaded: %s", err)
 
         if not init:
-            print("No INIT file, will not output PERM values")
+            logging.info("No INIT file, will not output PERM values")
         return init
 
     def exit_with_usage(self, msg=None, exit_code=0):
@@ -201,10 +201,10 @@ class SnapwellApp:
                 )
 
             if not conf_file[-3:] == ".sc":
-                warnings.warn(
+                logging.warning(
                     "It is highly recommended that a Snapwell config file has file extension .sc"
                 )
-            print("Parsing config file %s" % conf_file)
+            logging.info("Parsing config file %s", conf_file)
             try:
                 return SnapConfig.parse(conf_file)
             except ValueError as e:
@@ -300,13 +300,13 @@ class SnapwellApp:
 
         confstop = time()
         conftime = round(confstop - fullstart, 2)
-        print("\n\nConfiguration completed in %s sec.\n" % str(conftime))
+        logging.info("\n\nConfiguration completed in %s sec.\n", str(conftime))
 
         runner.main_loop()
 
         fullstop = time()
         fullsec = round(fullstop - fullstart, 2)
-        print("snapwell completed in %s seconds" % str(fullsec))
+        logging.info("snapwell completed in %s seconds", str(fullsec))
 
 
 def main():
