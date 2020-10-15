@@ -85,17 +85,14 @@ def test_config_sets_correct_paths(tmp_path):
     assert not config.overwrite()
 
 
-def test_overwrite(tmp_path):
+@pytest.mark.parametrize("overwrite_keyword", ["-w", "--overwrite"])
+def test_overwrite(tmp_path, overwrite_keyword):
     config_file_path = path.join(tmp_path, "config.sc")
     write_config(config_file_path)
 
-    app = swm.SnapwellApp(["snapwell", config_file_path, "--overwrite"])
+    app = swm.SnapwellApp(["snapwell", config_file_path, overwrite_keyword])
     config = app.load_config(app.parse_args())
     assert config.overwrite()
-
-    app2 = swm.SnapwellApp(["snapwell", config_file_path, "-w"])
-    config2 = app2.load_config(app2.parse_args())
-    assert config2.overwrite()
 
 
 test_data_path = path.join(path.dirname(__file__), "testdata", "snapwell")
@@ -114,8 +111,6 @@ def test_runner_correct_wellpaths():
     assert all(len(r) == 6 for r in rows)
 
 
-def test_run_test_data_exits_with_zero():
-    test_data_path = path.join(path.dirname(__file__), "testdata", "snapwell")
-
-    swm.SnapwellApp(["snapwell", path.join(test_data_path, "test-depth.sc")]).run()
-    swm.SnapwellApp(["snapwell", path.join(test_data_path, "test.sc")]).run()
+@pytest.mark.parametrize("config_file", ["test-depth.sc", "test.sc"])
+def test_run_test_data_exits_with_zero(config_file):
+    swm.SnapwellApp(["snapwell", path.join(test_data_path, config_file)]).run()
