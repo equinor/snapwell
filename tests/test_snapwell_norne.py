@@ -17,7 +17,7 @@ class TestSnapwellProgram(TestCase):
         self.testDataFolder = os.path.join(
             TestCase.PROJECT_ROOT, "tests", "testdata", "snapwell", "norne"
         )
-        self.snapwellprogram = "snapwell"
+        self.snapwellprogram = "snapwell_app"
         self.norneTestEdgeWellPath = os.path.join(
             self.testDataFolder, "norne-test-1-edge.w"
         )

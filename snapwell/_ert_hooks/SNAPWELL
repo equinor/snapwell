@@ -1,0 +1,5 @@
+EXECUTABLE snapwell_app
+
+DEFAULT <OPTS> ""
+
+ARGLIST <CONFIG> -o <output> -z <owc_offset> -f <owc_definition> -d <delta> <OPTS>
