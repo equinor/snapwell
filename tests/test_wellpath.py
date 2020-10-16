@@ -82,7 +82,7 @@ class WellpathTest(TestCase):
         wp.addRaw((50, 51, 52, 53))
         self.assertEqual(len(wp), 2)
         data = [d for d in wp.rows()]
-        self.assertEquals([[13, 17, 19, 23], [50, 51, 52, 53]], data)
+        self.assertEqual([[13, 17, 19, 23], [50, 51, 52, 53]], data)
 
         # update cell
         with self.assertRaises(IndexError):
@@ -92,10 +92,10 @@ class WellpathTest(TestCase):
         with self.assertRaises(KeyError):
             wp.update("a", 1, 1729)
         data = [d for d in wp.rows()]
-        self.assertEquals([[13, 17, 19, 23], [50, 51, 52, 53]], data)
+        self.assertEqual([[13, 17, 19, 23], [50, 51, 52, 53]], data)
         wp.update("d", 1, 1729)
         data = [d for d in wp.rows()]
-        self.assertEquals([[13, 17, 19, 23], [50, 51, 52, 1729]], data)
+        self.assertEqual([[13, 17, 19, 23], [50, 51, 52, 1729]], data)
 
         # removal of column
         with self.assertRaises(ValueError):
@@ -107,13 +107,13 @@ class WellpathTest(TestCase):
         wp.addRaw((90, 91, 92))
         self.assertEqual(len(wp), 3)
         data = [d for d in wp.rows()]
-        self.assertEquals([[13, 17, 19], [50, 51, 52], [90, 91, 92]], data)
-        self.assertEquals(wp[1], [50, 51, 52])
+        self.assertEqual([[13, 17, 19], [50, 51, 52], [90, 91, 92]], data)
+        self.assertEqual(wp[1], [50, 51, 52])
 
         # setting info
         wp[2] = [80, 81, 82]
         data = [d for d in wp.rows()]
-        self.assertEquals([[13, 17, 19], [50, 51, 52], [80, 81, 82]], data)
+        self.assertEqual([[13, 17, 19], [50, 51, 52], [80, 81, 82]], data)
 
     def test_WellpathDepth(self):
         wp = WellPath()

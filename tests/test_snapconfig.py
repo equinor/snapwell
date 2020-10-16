@@ -57,7 +57,7 @@ class SnapConfigTest(TestCase):
         _logKeywords = ("LENGTH", "TVD_DIFF", "OLD_TVD", "OWC", "PERMX")
 
         for i in range(len(_logKeywords)):
-            self.assertEquals(
+            self.assertEqual(
                 _logKeywords[i],
                 snap.logKeywords()[i],
                 "Expected LOG keyword: %s, got: %s"
