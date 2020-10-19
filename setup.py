@@ -13,9 +13,6 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(include=["snapwell*"]),
     install_requires=["libecl", "equinor-libres"],
-    extras_require={
-        "ert-hooks": ["ensemble-reservoir-tool @ git+https://github.com/equinor/ert"]
-    },
     entry_points={
         "console_scripts": [
             "snapwell_app=snapwell.snapwell_main:main",
