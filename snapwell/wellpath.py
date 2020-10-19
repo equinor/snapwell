@@ -209,31 +209,22 @@ class WellPath:
                 raise IndexError("column index out of range, 0 <= col < %d" % cs)
             col = self._headers[col]
 
-        if not col in self._headers:
+        if col not in self._headers:
             raise KeyError("Key %s does not name a column" % str(col))
 
         self._table[col][idx] = elt
 
-    def __iter__(self):
-        return self
-
     def __getitem__(self, idx):
-        if type(idx) == type(""):
+        if isinstance(idx, str):
             return self._table[idx]
         return [self._table[key][idx] for key in self._headers]
 
     def __setitem__(self, idx, elt):
-        if type(elt) == type({}):
-            for key in self._table:
-                insert[key] = elt[key]
-            for key in insert:
-                self._table[key][idx] = insert[key]
-        else:
-            lx = len(self._headers)
-            ld = len(elt)
-            for i in range(min(lx, ld)):
-                h = self._headers[i]
-                self._table[h][idx] = elt[i]
+        lx = len(self._headers)
+        ld = len(elt)
+        for i in range(min(lx, ld)):
+            h = self._headers[i]
+            self._table[h][idx] = elt[i]
         if idx == 0:
             self.updateRkb()
 
