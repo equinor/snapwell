@@ -137,7 +137,7 @@ class SnapwellApp:
         return wellpaths
 
     def load_restart_file(self, config):
-        logging.info("Loading restart %s" % config.restartFile())
+        logging.info("Loading restart %s", config.restartFile())
         restart = None
         restartFile = config.restartFile()
         try:
@@ -155,7 +155,7 @@ class SnapwellApp:
         return restart
 
     def load_grid_file(self, config):
-        logging.info("Loading grid %s" % config.gridFile())
+        logging.info("Loading grid %s", config.gridFile())
         grid = None
         gridFile = config.gridFile()
         try:
