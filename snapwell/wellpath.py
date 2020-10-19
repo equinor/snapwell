@@ -12,9 +12,11 @@
 #  See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
 #  for more details.
 
+from os.path import exists
+
+from .snap_utils import Inf, close, finiteFloat
 from .snap_utils import read_next_tokenline as token
-from .snap_utils import Nan, Inf
-from .snap_utils import finiteFloat, tryFloat, close
+from .snap_utils import tryFloat
 
 
 class WellPath:
@@ -309,8 +311,6 @@ class WellPath:
             else:
                 fname = "%s.out" % self._filename
         if not overwrite:
-            from os.path import exists
-
             if exists(fname):
                 raise IOError(
                     "Filename %s exists, cannot overwrite unless explicitly told to!"

@@ -12,14 +12,8 @@
 #  See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
 #  for more details.
 
-import sys
 
-from ecl.eclfile import EclFile
-from ecl.grid import EclGrid
-
-from .snap_utils import Inf, Nan, roundAwayFromEven, findKeyword, enterSnapMode
-from .snap_utils import close, dist
-
+from .snap_utils import Inf, Nan, dist, enterSnapMode, findKeyword, roundAwayFromEven
 
 # The next ten lines are used for improved logging (skipping repeated lines)
 _snap_prevmsg = ""
