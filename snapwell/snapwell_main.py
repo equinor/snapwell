@@ -108,7 +108,7 @@ class SnapwellApp:
             outpath = path.abspath(args.output)
             if path.isfile(outpath):
                 self.exit_with_usage(
-                    "Output path is an existing file.  Delete file, or choose a different output path."
+                    "Output path is an existing file. Delete it or choose a different output path."
                 )
             if not path.exists(outpath):
                 makedirs(outpath)
@@ -242,7 +242,7 @@ class SnapwellApp:
             "-o",
             "--output",
             type=str,
-            help="Output folder.  In this folder, all the new wellpath files are written on the specified format.",
+            help="Output folder. In this folder, all the new wellpath files are written.",
         )
         parser.add_argument(
             "-z", "--owc_offset", type=float, help="OWC offset in meters, e.g. 0.5"
