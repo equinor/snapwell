@@ -13,10 +13,7 @@
 #  for more details.
 
 from datetime import datetime
-import sys
-import logging
-from math import isnan, isinf, sqrt
-
+from math import isinf, isnan, sqrt
 
 Nan = float("nan")  # Not-a-number capitalized like None, True, False
 Inf = float("inf")  # infinite value capitalized ...
