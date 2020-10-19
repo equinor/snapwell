@@ -35,7 +35,6 @@
 """
 from pkg_resources import get_distribution, DistributionNotFound
 
-__name__ = "snapwell"
 __author__ = "PG Drange, K Flikka, and KW Kongsvik"
 __email__ = "pgdr@statoil.com"
 __copyright__ = "Copyright 2016, Statoil ASA"
