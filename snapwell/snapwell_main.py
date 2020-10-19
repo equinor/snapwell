@@ -25,6 +25,31 @@ from snapwell import snap, tryFloat
 from snapwell.snapconfig import SnapConfig
 
 
+class DuplicateFilter(logging.Filter):
+    def filter(self, record):
+        # add other fields if you need more granular comparison, depends on your app
+        current_log = (record.module, record.levelno, record.msg)
+        log_count = getattr(self, "log_count", 0)
+        if current_log != getattr(self, "last_log", None):
+            if log_count > 1:
+                print(f"Suppressed {self.log_count} similar messages")
+            self.last_log = current_log
+            self.log_count = 1
+            return True
+        else:
+            log_count = getattr(self, "log_count", 0)
+            self.log_count = log_count + 1
+
+        return False
+
+    def reset_count(self):
+        self.last_log = None
+        log_count = getattr(self, "log_count", 0)
+        if log_count > 1:
+            print(f"Suppressed {self.log_count} similar messages")
+        self.log_count = 0
+
+
 def warn_without_traceback(message, category, filename, lineno, file=None, line=None):
 
     log = file if hasattr(file, "write") else sys.stderr
@@ -67,10 +92,11 @@ class SnapwellRunner:
             )
             logging.info("Wrote %d rows to %s.out", rows, wp.filename())
             # done with this wellpath
+
         except ValueError as err:
-            logging.error("Error in well/grid/restart values: %s", err)
+            logging.error("in well/grid/restart values: %s", err)
         except IOError as err:
-            logging.error("Error while writing file: %s", err)
+            logging.error("while writing file: %s", err)
 
     def main_loop(self):
         num_snaps = len(self.wellpaths)
@@ -310,10 +336,14 @@ class SnapwellApp:
 
 
 def main():
+    logging.basicConfig(format="%(levelname)s: %(message)s")
+    f = DuplicateFilter()
+    logging.getLogger().addFilter(f)
     logging.info("Snapwell launched")
     warnings.showwarning = warn_without_traceback
     app = SnapwellApp(sys.argv)
     app.run()
+    f.reset_count()
 
 
 if __name__ == "__main__":
