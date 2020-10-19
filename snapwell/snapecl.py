@@ -13,28 +13,9 @@
 #  for more details.
 
 
+import logging
+
 from .snap_utils import Inf, Nan, dist, enterSnapMode, findKeyword, roundAwayFromEven
-
-# The next ten lines are used for improved logging (skipping repeated lines)
-_snap_prevmsg = ""
-_snap_prevmsgcnt = 0
-
-
-def doprint(msg):
-    """Prints msg unless it's a repetition from the previous time this function was
-    called, and if so, we output a repetition count and reset the counter.
-
-    """
-
-    global _snap_prevmsg, _snap_prevmsgcnt
-    if msg == _snap_prevmsg:
-        _snap_prevmsgcnt += 1
-    else:
-        if _snap_prevmsgcnt > 0:
-            print("         %d similar messages skipped\n" % _snap_prevmsgcnt)
-        _snap_prevmsgcnt = 0
-        _snap_prevmsg = msg
-        print(msg)
 
 
 def _activeIdx(grid, i, j, k):
@@ -216,22 +197,22 @@ def snap(
         permx_kw = init.iget_named_kw("PERMX", 0)  # step 0 -- INIT has only 1 step
     else:
         if "PERMX" in keywords:
-            doprint("WARNING: PERMX requested, but no INIT.  Ignoring keyword PERMX")
+            logging.warning("PERMX requested, but no INIT. Ignoring keyword PERMX")
             keywords = [kw for kw in keywords if kw != "PERMX"]
 
     c_owc_offset = wp.owcOffset()
     if c_owc_offset is None:
         c_owc_offset = owc_offset
     else:
-        print("     \t Overriding global OWC_OFFSET.  Using value %.2f" % c_owc_offset)
+        logging.info("Overriding global OWC_OFFSET. Using value %.2f", c_owc_offset)
 
     c_owc_definition = wp.owcDefinition()
     if c_owc_definition is None:
         c_owc_definition = owc_definition[1]
     else:
-        print(
-            "     \t Overriding global OWC_DEFINITION.  Using value %.2f"
-            % c_owc_definition
+        logging.info(
+            "Overriding global OWC_DEFINITION. Using value %.2f",
+            c_owc_definition,
         )
 
     # pick out swat/sgas/etc info for given step
@@ -270,9 +251,9 @@ def snap(
         # Ready to enter snap mode?
         new_mode = enterSnapMode(snap_mode, wp, idx)
         if new_mode and not snap_mode:
-            print("Enabling snap mode at point %d (depth %.2f)" % (idx, z))
-            print(
-                "                      %s %f" % (str(wp.depthType()), wp.windowDepth())
+            logging.info("Enabling snap mode at point %d (depth %.2f)", idx, z)
+            logging.info(
+                "                      %s %f", str(wp.depthType()), wp.windowDepth()
             )
             snap_mode = new_mode
 
@@ -318,14 +299,13 @@ def snap(
 
         diff = abs(z - new_tvd)
         if diff > 100:
-            doprint(
-                "Warning: Observed a vertical adjustment of %d m.  Ignoring."
-                % int(diff)
+            logging.warning(
+                "Observed a vertical adjustment of %d m. Ignoring.", int(diff)
             )
             new_tvd = z
             diff = 0
 
-        ### END OF WELLPOINT ITERATIONS ###
+        # END OF WELLPOINT ITERATIONS
 
         # Now we add this row's values on to the columns: perm, owc, length, old_tvd, diff etc.
         logs["TVD_DIFF"].append(new_tvd - z)
@@ -334,9 +314,14 @@ def snap(
         new_cell = _activeIdx(grid, i, j, k)  # Active index of (i,j,k), or -1
 
         if new_cell < 0 and snap_mode:
-            doprint(
-                "Warning:  Suggested wellpoint inactive.  (%d,%d,%d)\t->\t(%.1f, %.1f, %.1f)"
-                % (i, j, k, x, y, new_tvd)
+            logging.warning(
+                "Suggested wellpoint inactive.  (%d,%d,%d)\t->\t(%.1f, %.1f, %.1f)",
+                i,
+                j,
+                k,
+                x,
+                y,
+                new_tvd,
             )
         permx = Nan
         if permx_kw and new_cell >= 0:
@@ -385,7 +370,6 @@ def snap(
         if kw in recognized_kw:
             wp.addColumn(kw, logs[kw])
         else:
-            doprint('Warning: Unrecognized keyword "%s".  Ignoring' % kw)
-    doprint("")
+            logging.warning('Unrecognized keyword "%s".  Ignoring', kw)
 
     return wp
