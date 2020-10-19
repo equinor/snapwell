@@ -42,25 +42,20 @@ def _ijk(grid, x, y, z):
     return ijk
 
 
-def activeCellColumn(grid, owc_kw, x, y, z):
-    """Let i,j,k be the cell containing x,y,z.  This function returns a pair,
-    (col,idx), where the first element, col, is a list of the active cells in
-    the (i,j)-column
+def active_cell_column(grid, owc_kw, x, y, z):
+    """Let i,j,k be the cell containing x,y,z.  This function returns a list of
+    the active cells in the (i,j)-column
 
         [(i,j,n_z,an_z,sn_z), (i,j,n_z-1,an_z-1,sn_z-1), ..., (i,j,0,a0,s0)],
 
     where n_z is the height of the grid, at is the active index of the t'th
     cell in the list and st its s owc_kw.
 
-    The second element of the output, idx, is the index of the cell
-    containing x,y,z.  We filter away inactive cells.
-
     In the case where there is no cell found containing xyz, this function
-    will return ([], -1).
+    will return [].
 
     """
     col = []
-    ret_idx = -1
 
     ijk = _ijk(grid, x, y, z)
     i, j, k = ijk
@@ -69,13 +64,11 @@ def activeCellColumn(grid, owc_kw, x, y, z):
     for k_idx in range(nz - 1, -1, -1):  # backwards from nz-1 to 0
         a = _activeIdx(grid, i, j, k_idx)
         s = Nan
-        if k_idx == k:
-            ret_idx = num_cells
         if a >= 0:
             s = owc_kw[a]
             col.append((i, j, k_idx, a, s))
             num_cells += 1
-    return (col, ret_idx)
+    return col
 
 
 def interpolate(grid, k_above, col, thresh):
@@ -111,54 +104,81 @@ def interpolate(grid, k_above, col, thresh):
     return owc
 
 
-def findOwc(grid, owc_kw, x, y, z, thresh=0.7, owc_offset=0.5):
-    """Given a grid, owc_kw, x, y, z, find the OWC Z s.t. owc_kw(x,y,Z)=thresh.
+def first_swat_below_treshold(column, threshold=0.7):
+    """
+    finds the first (i,j,k,a,swat) tuple with swat less than treshold.
+    If there is no such tuple, returns None.
+    :param column: List of (x,y,z,a,swat) tuples.
+    """
+    for idx, (_, _, _, _, swat) in enumerate(column):
+        if swat < (threshold + 0.0001):
+            return idx
+    return None
 
-    This function returns a pair (owc, tvd) where owc is the approximate
-    (linear interpolated) OWC for (x,y) and tvd is the lowest cell center
-    above owc_exact - owc_offset.
 
+def interpolate_owc(grid, col, k_above, threshold=0.7):
+    """
+    This function returns  the approximate
+    (linear interpolated) OWC for (x,y).
+
+    :param col: List of (i,j,k,a,s) tuples to interpolate over.
+    :param grid: The grid the column belongs to.
+    :param k_above:index of first cell whose center is above owc.
     """
 
-    col, _ = activeCellColumn(grid, owc_kw, x, y, z)
+    a_idx = col[k_above][3]  # col[idx] contains x,y,z,a,s
+
+    if k_above > 0:
+        return interpolate(grid, k_above, col, threshold)
+
+    return grid.get_xyz(active_index=a_idx)[2]
+
+
+def find_center_z(grid, column, height):
+    """
+    Given list of (i,j,k,a,swat) tuples giving indecies of active cells in
+    the grid. Returns the center point z value of a cell in the grid above the
+    given height.  Returns None if cell center above the last column center
+    """
+    for idx, (_, _, _, a_idx, _) in enumerate(column):
+        cell_center = grid.get_xyz(active_index=a_idx)[2]  # the z value of cell center
+        if height >= cell_center:
+            return cell_center
+    return None
+
+
+def find_owc(grid, owc_kw, x, y, z, threshold=0.7, owc_offset=0.5):
+    """Given a grid, owc_kw, x, y, z, find the OWC Z s.t. owc_kw(x,y,Z)=thresh."""
+    col = active_cell_column(grid, owc_kw, x, y, z)
     if not col:
-        raise ValueError(
-            "Could not find cell column for (%.2f, %.2f, %.2f) in grid." % (x, y, z)
+        logging.warning(
+            "No active cell for %s at (%f, %f, %f), owc is Nan", owc_kw, x, y, z
         )
-
-    current_swat = -1
-    # Called inv_k because it is inv_k = nz - k
-    for inv_k, (_, _, _, active, sat) in enumerate(col):
-        if active >= 0:
-            current_swat = sat
-            break
-    # inv_k is first active index from below.
-    if current_swat < 0:
-        raise ValueError("No active cell in column for (%.2f,%.2f,%.2f)" % (x, y, z))
-
-    while current_swat >= (thresh + 0.0001):
-        inv_k += 1
-        if inv_k >= len(col):
-            raise ValueError("No OWC in column for (%.2f,%.2f,%.2f)" % (x, y, z))
-        current_swat = col[inv_k][4]
-
-    a_idx = col[inv_k][3]  # col[idx] contains x,y,z,a,s
-    cell_center = grid.get_xyz(active_index=a_idx)[2]  # the z value of cell center
-
-    if inv_k > 0:
-        owc_exact = interpolate(grid, inv_k, col, thresh)
-    else:
-        owc_exact = grid.get_xyz(active_index=a_idx)[2]
-
+        return Nan, z
+    threshold_idx = first_swat_below_treshold(col, threshold=threshold)
+    if threshold_idx is None:
+        logging.warning(
+            "No active cell has swat below treshold for %s at (%f, %f, %f), owc is Nan",
+            owc_kw,
+            x,
+            y,
+            z,
+        )
+        return Nan, z
     # snap to first cell center above 'owc_exact - owc_offset'
-    while (owc_exact - owc_offset) < cell_center:
-        inv_k += 1
-        if inv_k >= len(col):
-            break
-        a_idx = col[inv_k][3]  # col[idx] contains x,y,z,a,s
-        cell_center = grid.get_xyz(active_index=a_idx)[2]
+    owc_exact = interpolate_owc(grid, col, threshold_idx, threshold=threshold)
+    cell_center = find_center_z(grid, col, owc_exact - owc_offset)
+    if cell_center is None:
+        logging.warning(
+            "Depth is above active cells for %s at (%f, %f, %f), using depth from last active cell",
+            owc_kw,
+            x,
+            y,
+            z,
+        )
+        return owc_exact, grid.get_xyz(active_index=col[-1][3])[2]
 
-    return (owc_exact, cell_center)
+    return owc_exact, cell_center
 
 
 def snap(
@@ -264,19 +284,15 @@ def snap(
         #
         if snap_mode:
             snapped_idx += 1
-            try:
-                # findOwc returns owc, cell_column and index (in col) of cell
-                owc_exact, new_tvd = findOwc(
-                    grid,
-                    owc_kw,
-                    x,
-                    y,
-                    z,
-                    thresh=c_owc_definition,
-                    owc_offset=c_owc_offset,
-                )
-            except ValueError as err:
-                doprint("Warning: %s" % err)
+            owc_exact, new_tvd = find_owc(
+                grid,
+                owc_kw,
+                x,
+                y,
+                z,
+                threshold=c_owc_definition,
+                owc_offset=c_owc_offset,
+            )
 
         #
         # Step 2.  If this is not the first point of the well, and we are
