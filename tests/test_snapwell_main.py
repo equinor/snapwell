@@ -143,3 +143,25 @@ def test_missing_init_gives_error(capsys, tmp_path):
     assert e.value.code == 2
     cap = capsys.readouterr().err
     assert "load supplied INIT file" in cap
+
+
+@pytest.mark.parametrize("config_file", ["test-depth.yaml", "test.yaml"])
+def test_commandline_owc_defintion(config_file):
+    app = swm.SnapwellApp(
+        ["snapwell", path.join(test_data_path, config_file), "-f", "SWAT:0.7"]
+    )
+    owc_definition = app.load_config(app.parse_args()).owc_definition
+
+    assert owc_definition.keyword == "SWAT"
+    assert owc_definition.value == 0.7
+
+
+@pytest.mark.parametrize("owc_def", ["SWAT::", "SWAT0.7", "SWAT:bad", "   :0.7"])
+def test_commandline_owc_defintion_malformed_owc_defnition(capsys, owc_def):
+    app = swm.SnapwellApp(
+        ["snapwell", path.join(test_data_path, "test.yaml"), "-f", owc_def]
+    )
+    with pytest.raises(SystemExit) as e:
+        app.parse_args()
+    assert e.value.code == 2
+    assert "owc definition" in capsys.readouterr().err
