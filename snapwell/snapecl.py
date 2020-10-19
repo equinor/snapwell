@@ -139,7 +139,7 @@ def findOwc(grid, owc_kw, x, y, z, thresh=0.7, owc_offset=0.5):
 
     """
 
-    col, idx = activeCellColumn(grid, owc_kw, x, y, z)
+    col, _ = activeCellColumn(grid, owc_kw, x, y, z)
     if not col:
         raise ValueError(
             "Could not find cell column for (%.2f, %.2f, %.2f) in grid." % (x, y, z)
@@ -147,9 +147,9 @@ def findOwc(grid, owc_kw, x, y, z, thresh=0.7, owc_offset=0.5):
 
     current_swat = -1
     # Called inv_k because it is inv_k = nz - k
-    for inv_k in range(0, len(col)):
-        if col[inv_k][3] >= 0:  #           x,y,z,a,s
-            current_swat = col[inv_k][4]  #       ^ ^
+    for inv_k, (_, _, _, active, sat) in enumerate(col):
+        if active >= 0:
+            current_swat = sat
             break
     # inv_k is first active index from below.
     if current_swat < 0:
@@ -261,11 +261,7 @@ def snap(
         sgas = findKeyword("SGAS", rest, date)
 
     snapped_idx = 0
-    for idx in range(len(wp)):
-        point = wp[idx]
-        x = point[0]
-        y = point[1]
-        z = point[2]
+    for idx, (x, y, z) in enumerate(wp):
         logs["OLD_TVD"].append(z)
         new_tvd = z
         owc_exact = Nan
@@ -274,7 +270,7 @@ def snap(
         # Ready to enter snap mode?
         new_mode = enterSnapMode(snap_mode, wp, idx)
         if new_mode and not snap_mode:
-            print("Enabling snap mode at point %d (depth %.2f)" % (idx, wp[idx][2]))
+            print("Enabling snap mode at point %d (depth %.2f)" % (idx, z))
             print(
                 "                      %s %f" % (str(wp.depthType()), wp.windowDepth())
             )

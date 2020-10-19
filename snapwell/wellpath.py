@@ -277,7 +277,7 @@ class WellPath:
             )
             raise ValueError("Could not parse WellPath file %s: %s" % (fname, err))
 
-        for i in range(num_columns):
+        for _ in range(num_columns):
             header = token(f).split()[0]  # ignore unit,scale for now
             wp.addColumn(header)
 
