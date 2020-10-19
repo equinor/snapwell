@@ -61,11 +61,11 @@ class WellPath:
         try:
             t = float(rkb[0]), float(rkb[1]), float(rkb[2])
             self._rkb = t
-        except ValueError:
+        except ValueError as e:
             raise ValueError(
                 "Need x,y,z to be floats, got (%s, %s, %s)"
                 % (str(type(rkb[0])), str(type(rkb[1])), str(type(rkb[2])))
-            )
+            ) from e
 
     def rkb(self):
         x, y, z = self._rkb[0], self._rkb[1], self._rkb[2]
@@ -275,7 +275,9 @@ class WellPath:
             print(
                 "Could not parse required <num_logs> integer, is this really a WellPath file?"
             )
-            raise ValueError("Could not parse WellPath file %s: %s" % (fname, err))
+            raise ValueError(
+                "Could not parse WellPath file %s: %s" % (fname, err)
+            ) from err
 
         for _ in range(num_columns):
             header = token(f).split()[0]  # ignore unit,scale for now
