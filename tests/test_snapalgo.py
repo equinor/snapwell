@@ -1,13 +1,13 @@
-from os.path import join, abspath
 import unittest
 from datetime import datetime
+from os.path import abspath, join
+
+from ecl import EclTypeEnum
+from ecl.eclfile import Ecl3DKW, EclKW
+from ecl.grid import EclGridGenerator
+from snapwell import Inf, WellPath, snapecl
 
 from .testcase import TestCase
-from snapwell import WellPath, snapecl, Inf
-
-from ecl.eclfile import EclKW, Ecl3DKW
-from ecl import EclTypeEnum
-from ecl.grid import EclGridGenerator
 
 
 class SnapAlgorithmTest(TestCase):
@@ -39,7 +39,7 @@ class SnapAlgorithmTest(TestCase):
         # (findOwc return value) differ with 0.5m.  Hence OWC=0.30 at 3.5m
 
         for t in self.dataset:
-            owc, tvd = snapecl.findOwc(g, kw, 5, 5, 1, thresh=t)
+            owc, _ = snapecl.find_owc(g, kw, 5, 5, 1, threshold=t)
             self.assertAlmostEqual((t * 10) + 0.5, owc, delta=self.epsilon)
 
     def test_findOwcAlgorithmHighCell(self):
@@ -55,7 +55,7 @@ class SnapAlgorithmTest(TestCase):
         # (findOwc return value) differ with m.  Hence OWC=20xthresh+1m?
 
         for t in self.dataset:
-            owc, tvd = snapecl.findOwc(g, kw, 5, 5, 1, thresh=t)
+            owc, _ = snapecl.find_owc(g, kw, 5, 5, 1, threshold=t)
             self.assertAlmostEqual(20 * t + 1, owc, delta=self.epsilon)
 
 
