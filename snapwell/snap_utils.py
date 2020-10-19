@@ -68,18 +68,6 @@ def parse_date(s):
     return d
 
 
-def read_config(fname):
-    """Reads given file (as filename) and yields every non-empty line not
-    starting with --, whitespaces ignored."""
-    with open(fname, "r") as f:
-        for line in f:
-            l = line.strip()
-            if len(l) == 0 or (len(l) >= 2 and l[:2] == "--"):
-                continue
-            else:
-                yield strip_line(l)
-
-
 def roundAwayFromEven(val):
     """Eclipse cannot deal with values close to even integers.  We
     (in)sanitize the value so that it always will be at least 0.1m away
