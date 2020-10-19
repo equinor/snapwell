@@ -207,10 +207,10 @@ class SnapwellApp:
             logging.info("Parsing config file %s", conf_file)
             try:
                 return SnapConfig.parse(conf_file)
-            except ValueError as e:
+            except ValueError as err:
                 raise argparse.ArgumentTypeError(
-                    f"Error while parsing snapwell config file: {e}"
-                ) from e
+                    f"Error while parsing snapwell config file: {err}"
+                ) from err
 
         def owc_definition(od):
             od = od.strip()

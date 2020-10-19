@@ -61,11 +61,11 @@ class WellPath:
         try:
             t = float(rkb[0]), float(rkb[1]), float(rkb[2])
             self._rkb = t
-        except ValueError as e:
+        except ValueError as err:
             raise ValueError(
                 "Need x,y,z to be floats, got (%s, %s, %s)"
                 % (str(type(rkb[0])), str(type(rkb[1])), str(type(rkb[2])))
-            ) from e
+            ) from err
 
     def rkb(self):
         x, y, z = self._rkb[0], self._rkb[1], self._rkb[2]
