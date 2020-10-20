@@ -64,7 +64,9 @@ def well_path():
 
 
 def test_write_as_resinsight(snapshot, well_path):
-    snapshot.assert_match(well_path.file_as_str(resinsight=True))
+    out = StringIO()
+    well_path.write_to_stream(out, resinsight=True)
+    snapshot.assert_match(out.getvalue())
 
 
 def test_well_path_str(well_path):
