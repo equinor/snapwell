@@ -1,16 +1,39 @@
 import os
 import unittest
 from datetime import datetime
+from os.path import abspath, join
+from unittest.mock import MagicMock
 
-from .testcase import TestCase
-from snapwell import SnapConfig
+import pytest
+from ecl.eclfile import EclFile
 
 # utils
-from snapwell import findRestartStep, roundAwayFromEven
-from snapwell import parse_date
+from snapwell import (
+    SnapConfig,
+    findKeyword,
+    findRestartStep,
+    parse_date,
+    roundAwayFromEven,
+    tryFloat,
+)
 
-from ecl.eclfile import EclFile
-from os.path import join, abspath
+from .testcase import TestCase
+
+
+def test_parse_not_a_date():
+    with pytest.raises(ValueError, match="datetime string on the form"):
+        parse_date("Not a date")
+
+
+def test_parse_not_a_float():
+    assert tryFloat("Not a float", 0.0) == 0.0
+
+
+def test_keyword_out_of_range():
+    restart = MagicMock()
+    restart.num_report_steps.return_value = 100
+    with pytest.raises(ValueError, match="restart step out of range"):
+        findKeyword("SWAT", restart, None, 100)
 
 
 class SnapwellUtilTest(TestCase):
