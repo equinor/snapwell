@@ -60,9 +60,9 @@ class WellPath:
         self._window_depth = -Inf
         self.owc_definition = None
         self.owc_offset = None
-        if filename and len(filename) > 3 and filename[-3:] == ".sc":
+        if filename and len(filename) > 5 and filename[-5:] == ".yaml":
             logging.warning(
-                "WellPath file extension is .sc.  Potentially a Snapwell config file."
+                "WellPath file extension is .yaml.  Potentially a Snapwell config file."
             )
 
     @property

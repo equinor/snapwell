@@ -11,7 +11,7 @@ from .testcase import TestCase
 
 
 def test_well_path_file_extension_warning(caplog):
-    WellPath(filename="config.sc")
+    WellPath(filename="config.yaml")
     assert any("Potentially a Snapwell config" in r.message for r in caplog.records)
 
 
