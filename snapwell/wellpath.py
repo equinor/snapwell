@@ -12,11 +12,28 @@
 #  See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
 #  for more details.
 
+import logging
+from functools import wraps
 from os.path import exists
 
 from .snap_utils import Inf, close, finiteFloat
 from .snap_utils import read_next_tokenline as token
 from .snap_utils import tryFloat
+
+
+def takes_stream(i, mode):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if len(args) > i and args[i] is not None and isinstance(args[i], str):
+                with open(args[i], mode) as f:
+                    return func(*args[:i], f, *args[i + 1 :], **kwargs)
+            else:
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 class WellPath:
@@ -44,8 +61,8 @@ class WellPath:
         self._owc_definition = None
         self._owc_offset = None
         if filename and len(filename) > 3 and filename[-3:] == ".sc":
-            print(
-                "Warning:  WellPath file extension is .sc.  Potentially a Snapwell config file."
+            logging.warning(
+                "WellPath file extension is .sc.  Potentially a Snapwell config file."
             )
 
     def filename(self):
@@ -230,15 +247,16 @@ class WellPath:
         return self._wellname
 
     @staticmethod
-    def parse(fname):
-        """Given a filename, parses and returns a WellPath object.
+    @takes_stream(0, "r+")
+    def parse(f):
+        """Given a file, parses and returns a WellPath object.
         * easting  (X UTM)
         * northing (Y UTM)
         * tvd mls  (Z UTM, true vertical depth)
         * ...      (specified in format file, see readme)
         """
 
-        f = open(fname, "r")
+        fname = getattr(f, "name", "stream")
 
         version = token(f)
         well_type = token(f)
@@ -264,11 +282,8 @@ class WellPath:
         try:
             num_columns = int(num_columns_line)
         except ValueError as err:
-            print(
-                "Could not parse required <num_logs> integer, is this really a WellPath file?"
-            )
             raise ValueError(
-                "Could not parse WellPath file %s: %s" % (fname, err)
+                f"Could not parse WellPath file, no <num_logs> integer, {fname}: {err}"
             ) from err
 
         for _ in range(num_columns):
@@ -285,32 +300,11 @@ class WellPath:
 
         return wp
 
-    def write(self, fname=None, overwrite=False, resinsight=False):
-        """Opens fname and writes this object to file in the typical WellPath format
-        (see readme).  If fname exists and overwrite is not explicitly set to
-        True, this method will throw.
-
-        The output is version\ntype\nname\n0\ndata where data is len(this)
-        many lines of three (space separated) columns with the columns being,
-        respectively, x (utm), y (utm) and z (utm), the latter being the new
-        depth-optimized output.
-
+    def file_as_str(self, resinsight=False):
         """
-        if not fname:
-            if not self._filename:
-                raise ValueError(
-                    "WellPath.filename is unspecified and fname not provided.  "
-                    "Need at least one."
-                )
-            else:
-                fname = "%s.out" % self._filename
-        if not overwrite:
-            if exists(fname):
-                raise IOError(
-                    "Filename %s exists, cannot overwrite unless explicitly told to!"
-                    % fname
-                )
-
+        result is the same as WellPath.write, but returns a string rather than
+        writing to file.
+        """
         fmt = lambda s: "%.2f" % s
         out_rkb = " ".join(map(fmt, self._rkb))
         nl = "\n"
@@ -347,11 +341,37 @@ class WellPath:
                 )  # ResInsight wants only 'x y tvd md'
             linecount += 1
 
-        # Writing file ...
-        with open(fname, "w") as out:
-            out.write(head + logs + body)
+        return head + logs + body
 
-        return linecount
+    def write(self, fname=None, overwrite=False, resinsight=False):
+        """Opens fname and writes this object to file in the typical WellPath format
+        (see readme).  If fname exists and overwrite is not explicitly set to
+        True, this method will throw.
+
+        The output is version\ntype\nname\n0\ndata where data is len(this)
+        many lines of three (space separated) columns with the columns being,
+        respectively, x (utm), y (utm) and z (utm), the latter being the new
+        depth-optimized output.
+
+        """
+        if not fname:
+            if not self._filename:
+                raise ValueError(
+                    "WellPath.filename is unspecified and fname not provided.  "
+                    "Need at least one."
+                )
+            fname = "%s.out" % self._filename
+        if not overwrite:
+            if exists(fname):
+                raise IOError(
+                    "Filename %s exists, cannot overwrite unless explicitly told to!"
+                    % fname
+                )
+
+        with open(fname, "w") as fname_out:
+            fname_out.write(self.file_as_str(resinsight))
+
+        return len(self)
 
     def __eq__(self, other):
         try:
@@ -362,20 +382,20 @@ class WellPath:
             if wid_s != wid_o:
                 return False
             for h in self._headers:
-                if not h in other._headers:
+                if h not in other._headers:
                     return False
                 col_s = self._table[h]
                 col_o = other._table[h]
                 for i in range(len_s):
                     if not close(col_s[i], col_o[i]):
-                        print(
-                            "Object differ in col %s, row %d: %f vs %f"
-                            % (h, i, col_s[i], col_o[i])
+                        logging.info(
+                            "Object differ in col %s, row %d: %f vs %f",
+                            h,
+                            i,
+                            col_s[i],
+                            col_o[i],
                         )
                         return False
             return True
         except AttributeError:
             return False
-
-    def __ne__(self, other):
-        return not (self == other)

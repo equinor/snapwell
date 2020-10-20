@@ -1,9 +1,96 @@
-from os.path import join, abspath
-from datetime import datetime
 import unittest
+from datetime import datetime
+from io import StringIO
+from os.path import abspath, dirname, join
+
+import numpy as np
+import pytest
+from snapwell import Inf, WellPath
 
 from .testcase import TestCase
-from snapwell import WellPath, Inf
+
+
+def test_well_path_file_extension_warning(caplog):
+    WellPath(filename="config.sc")
+    assert any("Potentially a Snapwell config" in r.message for r in caplog.records)
+
+
+def test_well_path_wrong_set_rkb_tuple():
+    wp = WellPath(filename="well.w")
+    with pytest.raises(ValueError, match="Need x,y,z to be floats"):
+        wp.setRkb(("r", "k", "b"))
+
+
+def test_well_path_duplicate_column():
+    wp = WellPath(filename="well.w")
+    with pytest.raises(KeyError, match="Key x exists in table."):
+        wp.addColumn("x")
+
+
+def test_well_path_wrong_update_rkb_tuple():
+    wp = WellPath(filename="well.w")
+
+    wp.addRaw([1, 1, 1])
+    wp.addColumn("MD", [np.nan])
+    assert not wp.updateRkb()
+
+
+def test_well_path_update():
+    wp = WellPath(filename="well.w")
+    wp.addRaw([1, 1, 1])
+    wp.update(2, 0, 2)
+    assert wp["z"] == [2]
+    with pytest.raises(IndexError, match="index out of range"):
+        wp.update(4, 0, 0)
+
+
+def test_parse_wrong_num_columns():
+    with pytest.raises(ValueError, match="<num_logs>"):
+        WellPath.parse(StringIO("1.0.0\nA - B\nname 0 0 0\nnumber_of_columns\n"))
+
+
+def test_write_unspecified_file():
+    wp = WellPath(filename=None)
+    with pytest.raises(ValueError, match="filename is unspecified"):
+        wp.write()
+
+
+test_data_path = join(dirname(__file__), "testdata", "snapwell")
+
+
+@pytest.fixture
+def well_path():
+    return WellPath.parse(join(test_data_path, "well.w"))
+
+
+def test_write_as_resinsight(snapshot, well_path):
+    snapshot.assert_match(well_path.file_as_str(resinsight=True))
+
+
+def test_well_path_str(well_path):
+    assert str(well_path) == "TEST_WELL"
+
+
+def test_well_path_different_columns_not_eq():
+    wp1 = WellPath()
+    wp2 = WellPath()
+    wp1.addColumn("MP")
+    wp2.addColumn("OMG")
+
+    assert wp1 != wp2
+
+
+def test_well_path_different_rows_not_eq():
+    wp1 = WellPath()
+    wp2 = WellPath()
+    wp1.addRaw([1, 1, 1])
+    wp2.addRaw([2, 2, 2])
+
+    assert wp1 != wp2
+
+
+def test_well_path_not_eq_str():
+    assert WellPath() != ""
 
 
 class WellpathTest(TestCase):
