@@ -2,12 +2,57 @@ import unittest
 from datetime import datetime
 from os.path import abspath, join
 
+import pytest
 from ecl import EclTypeEnum
 from ecl.eclfile import Ecl3DKW, EclKW
 from ecl.grid import EclGridGenerator
 from snapwell import Inf, WellPath, snapecl
 
 from .testcase import TestCase
+
+
+def test_interpolate_from_zero_raises():
+    with pytest.raises(IndexError, match="interpolate down"):
+        snapecl.interpolate(None, 0, None, None)
+
+
+def test_no_threshold_returns_none():
+    assert snapecl.first_swat_below_treshold([(0, 0, 0, 0, 1)] * 100) is None
+
+
+def test_no_active_above_z_returns_none():
+    grid = unittest.mock.MagicMock()
+    grid.get_xyz.return_value = (1, 1, 1)
+    assert snapecl.find_center_z(grid, [[1] * 5] * 100, 0.0) is None
+
+
+def test_no_active_logs_warning(caplog):
+    grid = unittest.mock.MagicMock()
+    grid.get_xyz.return_value = (1, 1, 1)
+    grid.find_cell.return_value = (0, 0, 0)
+    grid.get_active_index.return_value = -1
+    snapecl.find_owc(grid, [0], 0, 0, 0)
+    assert any("No active cell for" in r.message for r in caplog.records)
+
+
+def test_no_treshold_logs_warning(caplog):
+    grid = unittest.mock.MagicMock()
+    grid.get_xyz.return_value = (1, 1, 1)
+    grid.find_cell.return_value = (0, 0, 0)
+    grid.get_active_index.return_value = 1
+    snapecl.find_owc(grid, [1, 1], 0, 0, 0)
+    assert any("No active cell has swat below" in r.message for r in caplog.records)
+
+
+def test_no_cell_above_logs_warning(caplog):
+    grid = unittest.mock.MagicMock()
+    grid.get_xyz.return_value = (1, 1, 1)
+    grid.find_cell.return_value = (0, 0, 0)
+    grid.get_active_index.return_value = 1
+    owc, tvd = snapecl.find_owc(grid, [1, 0.7], 0, 0, 0)
+    assert any("Depth is above active" in r.message for r in caplog.records)
+    assert owc == 1
+    assert tvd == 1
 
 
 class SnapAlgorithmTest(TestCase):
