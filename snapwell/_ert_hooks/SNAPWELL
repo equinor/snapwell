@@ -1,5 +1,8 @@
 EXECUTABLE snapwell_app
 
-DEFAULT <OPTS> ""
+DEFAULT <output> "."
+DEFAULT <owc_offset> 0.5
+DEFAULT <owc_definition> "SWAT:0.7"
+DEFAULT <delta> Inf
 
-ARGLIST <CONFIG> -o <output> -z <owc_offset> -f <owc_definition> -d <delta> <OPTS>
+ARGLIST <CONFIG> -o <output> -z <owc_offset> -f <owc_definition> -d <delta>
