@@ -129,14 +129,6 @@ class WellPath:
             hs = [h for h in self._headers if h != header]
             self._headers = hs
 
-    def addRow(self, row):
-        insert = {}
-        # doing it like this makes us never need to rollback
-        for key in self._table:
-            insert[key] = row[key]  # consider catch/re-raise w/better msg
-        for key in insert:
-            self._table[key].append(insert[key])
-
     def addRaw(self, row):
         """Adds a raw row, where row now is a list following header's order"""
         if len(row) != len(self._table):
