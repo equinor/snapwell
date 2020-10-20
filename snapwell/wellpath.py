@@ -300,48 +300,38 @@ class WellPath:
 
         return wp
 
-    def file_as_str(self, resinsight=False):
+    def write_to_stream(self, out, resinsight=False):
         """
-        result is the same as WellPath.write, but returns a string rather than
-        writing to file.
+        result is the same as WellPath.write, but writes to the
+        given stream.
         """
-        fmt = lambda s: "%.2f" % s
-        out_rkb = " ".join(map(fmt, self._rkb))
         nl = "\n"
-        head = "%s%s%s%s%s %s%s%s%s" % (
-            str(self._version),
-            nl,
-            str(self._welltype),
-            nl,
-            str(self._wellname),
-            out_rkb,
-            nl,
-            str(len(self._headers) - 3),
-            nl,
-        )
+
+        def fmt(s):
+            return "%.2f" % s
 
         if resinsight:
-            head = str(self._wellname)
-
-        logs = ""
-        linecount = 0  # number of rows output
-        for i in range(3, len(self._headers)):
-            logs += "%s %s %s%s" % (self._headers[i], "1", "lin", nl)  # support lin
-
-        if resinsight:
-            logs = nl
-
-        body = ""
-        for r in self.rows():
-            if not resinsight:
-                body += " ".join(map(fmt, r)) + nl
-            else:
-                body += (
+            out.write(self._wellname)
+            out.write(nl)
+            for r in self.rows():
+                out.write(
                     " ".join(map(fmt, r[:4])) + nl
                 )  # ResInsight wants only 'x y tvd md'
-            linecount += 1
-
-        return head + logs + body
+        else:
+            out.write(self._version)
+            out.write(nl)
+            out.write(self._welltype)
+            out.write(nl)
+            out.write(self._wellname)
+            out.write(" ")
+            out.write(" ".join(map(fmt, self._rkb)))
+            out.write(nl)
+            out.write(str(len(self._headers) - 3))
+            out.write(nl)
+            for i in range(3, len(self._headers)):
+                out.write(f"{self._headers[i]} 1 lin" + nl)
+            for r in self.rows():
+                out.write(" ".join(map(fmt, r)) + nl)
 
     def write(self, fname=None, overwrite=False, resinsight=False):
         """Opens fname and writes this object to file in the typical WellPath format
@@ -369,7 +359,7 @@ class WellPath:
                 )
 
         with open(fname, "w") as fname_out:
-            fname_out.write(self.file_as_str(resinsight))
+            self.write_to_stream(fname_out, resinsight)
 
         return len(self)
 
