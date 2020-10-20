@@ -8,7 +8,7 @@ import snapwell.snapwell_main as swm
 def test_version(capsys):
     app = swm.SnapwellApp(["snapwell", "--version"])
     with pytest.raises(SystemExit) as e:
-        app.run()
+        swm.run(app)
     assert e.value.code == 0
     assert snapwell.__version__ in capsys.readouterr().out
 
@@ -113,4 +113,9 @@ def test_runner_correct_wellpaths():
 
 @pytest.mark.parametrize("config_file", ["test-depth.sc", "test.sc"])
 def test_run_test_data_exits_with_zero(config_file):
-    swm.SnapwellApp(["snapwell", path.join(test_data_path, config_file)]).run()
+    assert (
+        swm.run(
+            swm.SnapwellApp(["snapwell", path.join(test_data_path, config_file), "-w"])
+        )
+        == 0
+    )

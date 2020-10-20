@@ -262,7 +262,7 @@ def snap(
         sgas = findKeyword("SGAS", rest, date)
 
     snapped_idx = 0
-    for idx, (x, y, z) in enumerate(wp):
+    for idx, (x, y, z, *_) in enumerate(wp):
         logs["OLD_TVD"].append(z)
         new_tvd = z
         owc_exact = Nan
