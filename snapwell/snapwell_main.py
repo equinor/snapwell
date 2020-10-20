@@ -95,8 +95,11 @@ class SnapwellRunner:
 
         except ValueError as err:
             logging.error("in well/grid/restart values: %s", err)
+            return False
         except IOError as err:
             logging.error("while writing file: %s", err)
+            return False
+        return True
 
     def main_loop(self):
         num_snaps = len(self.wellpaths)
@@ -105,16 +108,18 @@ class SnapwellRunner:
         owc_def = self.config.owcDefinition()
         logging.info("owc_defini = %.3f (%s)", owc_def[1], owc_def[0])
         logging.info("output     = %s", self.config.output())
+        success = True
         for i, wp in enumerate(self.wellpaths):
             wp_date = self.config.date(i)
             sep = "=" * 79
             logging.info("\n\n%s", sep)
             logging.info("%d/%d \t Snapping %s", i + 1, num_snaps, wp.wellname())
             start = time()
-            self.run_and_write(wp, wp_date)
+            success = success and self.run_and_write(wp, wp_date)
             stop = time()
             sec = round(stop - start, 2)
             logging.info("Operation took %s seconds", str(sec))
+        return success
 
 
 class SnapwellApp:
@@ -319,20 +324,26 @@ class SnapwellApp:
             args.resinsight,
         )
 
-    def run(self):
-        fullstart = time()
 
-        runner = self.runner()
+def run(app):
+    fullstart = time()
 
-        confstop = time()
-        conftime = round(confstop - fullstart, 2)
-        logging.info("\n\nConfiguration completed in %s sec.\n", str(conftime))
+    runner = app.runner()
 
-        runner.main_loop()
+    confstop = time()
+    conftime = round(confstop - fullstart, 2)
+    logging.info("\n\nConfiguration completed in %s sec.\n", str(conftime))
 
-        fullstop = time()
-        fullsec = round(fullstop - fullstart, 2)
-        logging.info("snapwell completed in %s seconds", str(fullsec))
+    success = runner.main_loop()
+
+    fullstop = time()
+    fullsec = round(fullstop - fullstart, 2)
+    logging.info("snapwell completed in %s seconds", str(fullsec))
+
+    if not success:
+        logging.error("Snapwell completed, but errors occurred")
+        return -1
+    return 0
 
 
 def main():
@@ -341,9 +352,9 @@ def main():
     logging.getLogger().addFilter(f)
     logging.info("Snapwell launched")
     warnings.showwarning = warn_without_traceback
-    app = SnapwellApp(sys.argv)
-    app.run()
+    exit_val = run(SnapwellApp(sys.argv))
     f.reset_count()
+    sys.exit(exit_val)
 
 
 if __name__ == "__main__":
