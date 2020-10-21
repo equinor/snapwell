@@ -57,10 +57,16 @@ def write_config(
     grid_file="grid.EGRID",
     restart_file="restart.UNRST",
     well_files=[("well1.w", 2020)],
+    init_file=None,
+    keywords=[],
 ):
     with open(config_file_path, "w") as config_file:
         config_file.write(f"GRID {grid_file}\n")
         config_file.write(f"RESTART {restart_file}\n")
+        if init_file:
+            config_file.write(f"INIT {init_file}\n")
+        for kw in keywords:
+            config_file.write(f"LOG {kw}\n")
         for wf in well_files:
             config_file.write(f"WELLPATH {wf[0]} {wf[1]}\n")
 
@@ -119,3 +125,19 @@ def test_run_test_data_exits_with_zero(config_file):
         )
         == 0
     )
+
+
+def test_missing_init_gives_error(capsys, tmp_path):
+    config_file_path = path.join(tmp_path, "config.sc")
+
+    write_config(config_file_path, init_file="__MISSING__.INIT", keywords=["PERMX"])
+
+    app = swm.SnapwellApp(["snapwell", config_file_path])
+    args = app.parse_args()
+    config = app.load_config(args)
+    with pytest.raises(SystemExit) as e:
+        app.load_permx(config)
+
+    assert e.value.code == 2
+    cap = capsys.readouterr().err
+    assert "load supplied INIT file" in cap

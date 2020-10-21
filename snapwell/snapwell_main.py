@@ -64,11 +64,11 @@ class ParserPrintHelp(argparse.ArgumentParser):
 
 
 class SnapwellRunner:
-    def __init__(self, config, grid, restart, init, wellpaths, resinsight):
+    def __init__(self, config, grid, restart, permx, wellpaths, resinsight):
         self.config = config
         self.grid = grid
         self.restart = restart
-        self.init = init
+        self.permx = permx
         self.wellpaths = wellpaths
         self.resinsight = resinsight
 
@@ -79,9 +79,9 @@ class SnapwellRunner:
                 wp,
                 self.grid,
                 self.restart,
-                self.init,
                 wp_date,
                 owc_offset=self.config.owcOffset(),
+                permx_kw=self.permx,
                 keywords=self.config.logKeywords(),
                 delta=self.config.deltaZ(),
                 owc_definition=self.config.owcDefinition(),
@@ -202,20 +202,29 @@ class SnapwellApp:
                 )
         return grid
 
-    def load_init_file(self, config):
+    def load_permx(self, config):
         init = None
-        if config.initFile():
-            logging.info("Loading INIT %s", config.initFile())
+        if "PERMX" in config.logKeywords():
+            if config.initFile():
+                logging.info("Loading INIT %s", config.initFile())
+                try:
+                    init = config.getInit()
+                except Exception as err:
+                    self.exit_with_usage(f"could not load supplied INIT file: {err}")
+
+            if not init:
+                self.exit_with_usage("PERMX requested, but no INIT file given.")
             try:
-                init = config.getInit()
+                return init.iget_named_kw("PERMX", 0)
             except Exception as err:
-                logging.warning("supplied INIT file not loaded: %s", err)
+                self.exit_with_usage(
+                    f"Could not get permx keyword from init file: {err}"
+                )
+        if config.initFile():
+            logging.warning("Init file set, but PERMX keyword not requested, ignoring.")
+        return None
 
-        if not init:
-            logging.info("No INIT file, will not output PERM values")
-        return init
-
-    def exit_with_usage(self, msg=None, exit_code=0):
+    def exit_with_usage(self, msg=None, exit_code=2):
         self.parser.error(message=msg, exit_code=exit_code)
 
     @staticmethod
@@ -319,7 +328,7 @@ class SnapwellApp:
             config,
             self.load_grid_file(config),
             self.load_restart_file(config),
-            self.load_init_file(config),
+            self.load_permx(config),
             self.load_wellpaths(config),
             args.resinsight,
         )
