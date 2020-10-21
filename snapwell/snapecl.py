@@ -57,17 +57,13 @@ def active_cell_column(grid, owc_kw, x, y, z):
     """
     col = []
 
-    ijk = _ijk(grid, x, y, z)
-    i, j, k = ijk
+    i, j, _ = _ijk(grid, x, y, z)
     nz = grid.getNZ()
-    num_cells = 0
     for k_idx in range(nz - 1, -1, -1):  # backwards from nz-1 to 0
         a = _activeIdx(grid, i, j, k_idx)
-        s = Nan
         if a >= 0:
             s = owc_kw[a]
             col.append((i, j, k_idx, a, s))
-            num_cells += 1
     return col
 
 
