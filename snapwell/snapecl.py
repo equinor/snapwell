@@ -83,8 +83,8 @@ def interpolate(grid, k_above, col, thresh):
     k_below = k_above - 1
     if k_below < 0:
         raise IndexError("Cannot interpolate down from bottom cell.")
-    a_idx_below = col[k_below][3]
-    a_idx_above = col[k_above][3]  # recall col contains cell from bottom and up
+    active_idx_below = col[k_below][3]
+    active_idx_above = col[k_above][3]  # col contains cell from bottom and up
 
     swat_below = col[k_below][4]  # the SWAT/SGAS/etc in cell above and below OWC
     swat_above = col[k_above][4]
@@ -93,10 +93,9 @@ def interpolate(grid, k_above, col, thresh):
     norm_swat_thresh = swat_below - thresh
     norm_swat_ratio = 1 - (norm_swat_thresh / norm_swat_above)
 
-    z_above = grid.get_xyz(active_index=a_idx_above)[
-        2
-    ]  # z coordinate of cell gives height
-    z_below = grid.get_xyz(active_index=a_idx_below)[2]
+    # z coordinate of cell gives height
+    z_above = grid.get_xyz(active_index=active_idx_above)[2]
+    z_below = grid.get_xyz(active_index=active_idx_below)[2]
     z_diff = abs(z_above - z_below)  # distance between cell centers
 
     owc = z_above + z_diff * norm_swat_ratio
@@ -126,12 +125,12 @@ def interpolate_owc(grid, col, k_above, threshold=0.7):
     :param k_above:index of first cell whose center is above owc.
     """
 
-    a_idx = col[k_above][3]  # col[idx] contains x,y,z,a,s
+    active_idx = col[k_above][3]  # col[idx] contains x,y,z,a,s
 
     if k_above > 0:
         return interpolate(grid, k_above, col, threshold)
 
-    return grid.get_xyz(active_index=a_idx)[2]
+    return grid.get_xyz(active_index=active_idx)[2]
 
 
 def find_center_z(grid, column, height):
@@ -140,10 +139,10 @@ def find_center_z(grid, column, height):
     the grid. Returns the center point z value of a cell in the grid above the
     given height.  Returns None if cell center above the last column center
     """
-    for idx, (_, _, _, a_idx, _) in enumerate(column):
-        cell_center = grid.get_xyz(active_index=a_idx)[2]  # the z value of cell center
-        if height >= cell_center:
-            return cell_center
+    for (_, _, _, active_idx, _) in column:
+        cell_center_height = grid.get_xyz(active_index=active_idx)[2]
+        if height >= cell_center_height:
+            return cell_center_height
     return None
 
 
