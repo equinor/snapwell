@@ -115,20 +115,20 @@ def first_swat_below_treshold(column, threshold=0.7):
     return None
 
 
-def interpolate_owc(grid, col, k_above, threshold=0.7):
+def interpolate_owc(grid, col, k_above_owc, threshold=0.7):
     """
     This function returns  the approximate
     (linear interpolated) OWC for (x,y).
 
     :param col: List of (i,j,k,a,s) tuples to interpolate over.
     :param grid: The grid the column belongs to.
-    :param k_above:index of first cell whose center is above owc.
+    :param k_above_owc:index of first cell whose center is above owc.
     """
 
-    active_idx = col[k_above][3]  # col[idx] contains x,y,z,a,s
+    active_idx = col[k_above_owc][3]  # col[idx] contains x,y,z,a,s
 
-    if k_above > 0:
-        return interpolate(grid, k_above, col, threshold)
+    if k_above_owc > 0:
+        return interpolate(grid, k_above_owc, col, threshold)
 
     return grid.get_xyz(active_index=active_idx)[2]
 
