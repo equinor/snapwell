@@ -180,9 +180,9 @@ def snap(
     wp,
     grid,
     rest,
-    init,
     date,
     owc_offset=0.5,
+    permx_kw=None,
     keywords=None,
     delta=Inf,
     owc_definition=("SWAT", 0.7),
@@ -206,15 +206,6 @@ def snap(
     The date we use is the last restart step before the given date.
 
     """
-
-    permx_kw = None
-    if init:
-        permx_kw = init.iget_named_kw("PERMX", 0)  # step 0 -- INIT has only 1 step
-    else:
-        if "PERMX" in keywords:
-            logging.warning("PERMX requested, but no INIT. Ignoring keyword PERMX")
-            keywords = [kw for kw in keywords if kw != "PERMX"]
-
     c_owc_offset = wp.owcOffset()
     if c_owc_offset is None:
         c_owc_offset = owc_offset
