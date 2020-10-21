@@ -15,7 +15,8 @@ setup(
     install_requires=["libecl", "equinor-libres"],
     entry_points={
         "console_scripts": [
-            "snapwell_app=snapwell.snapwell_main:main",
+            "snapwell=snapwell.snapwell_main:main",
+            "snapwell_app=snapwell.snapwell_main:main",  # This is due to how libres picks up executables
         ],
         "ert": [
             "snapwell=snapwell._ert_hooks._ert_hook",
