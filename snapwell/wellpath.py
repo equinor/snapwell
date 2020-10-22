@@ -286,7 +286,6 @@ class WellPath:
         )
         wp.rkb = (rkb_x, rkb_y, rkb_z)
 
-        num_columns = 0
         num_columns_line = token(f)
         try:
             num_columns = int(num_columns_line)
