@@ -32,7 +32,7 @@ def test_well_path_wrong_update_rkb_tuple():
 
     wp.addRaw([1, 1, 1])
     wp.addColumn("MD", [np.nan])
-    assert not wp.updateRkb()
+    assert not wp._update_rkb()
 
 
 def test_well_path_update():
@@ -199,7 +199,7 @@ class WellpathTest(TestCase):
 
     def test_WellpathRkb(self):
         wp = WellPath()
-        self.assertFalse(wp.updateRkb())
+        self.assertFalse(wp._update_rkb())
         wp.addColumn("MD")
         x1, y1, z1, md1 = 530609.50, 6749152.00, 1563.00, 1602.39
         x2, y2, z2, md2 = 530608.91, 6749150.04, 1565.00, 1632.39
@@ -207,7 +207,7 @@ class WellpathTest(TestCase):
         rkb_expect = (x1, y1, md1 - z1)
         rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
-        self.assertTrue(wp.updateRkb())
+        self.assertTrue(wp._update_rkb())
         rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
         wp.addRaw((x2, y2, z2, md2))

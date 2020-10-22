@@ -154,13 +154,13 @@ class WellPath:
             idx += 1
 
         if len(self) == 1:
-            self.updateRkb()
+            self._update_rkb()
 
     def rows(self):
         for i in range(len(self)):
             yield [self._table[c][i] for c in self.headers]
 
-    def updateRkb(self):
+    def _update_rkb(self):
         """Updates the RKB values to the correct ones, that is, rkb=(x, y, z_r) where x
         and y are the x and y values of the first path point and the z_r is
         MD-TVD for the first point.
@@ -212,7 +212,7 @@ class WellPath:
             h = self.headers[i]
             self._table[h][idx] = elt[i]
         if idx == 0:
-            self.updateRkb()
+            self._update_rkb()
 
     def __len__(self):
         """The number of rows, i.e., the number of wellpoints."""
