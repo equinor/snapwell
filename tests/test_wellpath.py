@@ -24,20 +24,20 @@ def test_well_path_wrong_set_rkb_tuple():
 def test_well_path_duplicate_column():
     wp = WellPath(filename="well.w")
     with pytest.raises(KeyError, match="Key x exists in table."):
-        wp.addColumn("x")
+        wp.add_column("x")
 
 
 def test_well_path_wrong_update_rkb_tuple():
     wp = WellPath(filename="well.w")
 
-    wp.addRaw([1, 1, 1])
-    wp.addColumn("MD", [np.nan])
+    wp.add_raw_row([1, 1, 1])
+    wp.add_column("MD", [np.nan])
     assert not wp._update_rkb()
 
 
 def test_well_path_update():
     wp = WellPath(filename="well.w")
-    wp.addRaw([1, 1, 1])
+    wp.add_raw_row([1, 1, 1])
     wp.update(2, 0, 2)
     assert wp["z"] == [2]
     with pytest.raises(IndexError, match="index out of range"):
@@ -76,8 +76,8 @@ def test_well_path_str(well_path):
 def test_well_path_different_columns_not_eq():
     wp1 = WellPath()
     wp2 = WellPath()
-    wp1.addColumn("MP")
-    wp2.addColumn("OMG")
+    wp1.add_column("MP")
+    wp2.add_column("OMG")
 
     assert wp1 != wp2
 
@@ -85,8 +85,8 @@ def test_well_path_different_columns_not_eq():
 def test_well_path_different_rows_not_eq():
     wp1 = WellPath()
     wp2 = WellPath()
-    wp1.addRaw([1, 1, 1])
-    wp2.addRaw([2, 2, 2])
+    wp1.add_raw_row([1, 1, 1])
+    wp2.add_raw_row([2, 2, 2])
 
     assert wp1 != wp2
 
@@ -133,17 +133,17 @@ class WellpathTest(TestCase):
         self.assertEqual(["x", "y", "z"], wp.headers)
 
         self.assertEqual(len(wp), 0)
-        wp.addRaw((13, 17, 19))
+        wp.add_raw_row((13, 17, 19))
         self.assertEqual(len(wp), 1)
         with self.assertRaises(IndexError):
-            wp.addColumn("d", [])  # needs data of size 1
+            wp.add_column("d", [])  # needs data of size 1
 
         # adding column 'd'
-        wp.addColumn("d", [23])
+        wp.add_column("d", [23])
         self.assertEqual(["x", "y", "z", "d"], wp.headers)
         with self.assertRaises(IndexError):
-            wp.addRaw((50, 51, 52))
-        wp.addRaw((50, 51, 52, 53))
+            wp.add_raw_row((50, 51, 52))
+        wp.add_raw_row((50, 51, 52, 53))
         self.assertEqual(len(wp), 2)
         data = [d for d in wp.rows()]
         self.assertEqual([[13, 17, 19, 23], [50, 51, 52, 53]], data)
@@ -163,12 +163,12 @@ class WellpathTest(TestCase):
 
         # removal of column
         with self.assertRaises(ValueError):
-            wp.removeColumn("x")
-        wp.removeColumn("d")
+            wp.remove_column("x")
+        wp.remove_column("d")
         self.assertEqual(["x", "y", "z"], wp.headers)
         with self.assertRaises(IndexError):
-            wp.addRaw((90, 91, 92, 93))
-        wp.addRaw((90, 91, 92))
+            wp.add_raw_row((90, 91, 92, 93))
+        wp.add_raw_row((90, 91, 92))
         self.assertEqual(len(wp), 3)
         data = [d for d in wp.rows()]
         self.assertEqual([[13, 17, 19], [50, 51, 52], [90, 91, 92]], data)
@@ -200,17 +200,17 @@ class WellpathTest(TestCase):
     def test_WellpathRkb(self):
         wp = WellPath()
         self.assertFalse(wp._update_rkb())
-        wp.addColumn("MD")
+        wp.add_column("MD")
         x1, y1, z1, md1 = 530609.50, 6749152.00, 1563.00, 1602.39
         x2, y2, z2, md2 = 530608.91, 6749150.04, 1565.00, 1632.39
-        wp.addRaw((x1, y1, z1, md1))
+        wp.add_raw_row((x1, y1, z1, md1))
         rkb_expect = (x1, y1, md1 - z1)
         rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
         self.assertTrue(wp._update_rkb())
         rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
-        wp.addRaw((x2, y2, z2, md2))
+        wp.add_raw_row((x2, y2, z2, md2))
         rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
 
