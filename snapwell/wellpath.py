@@ -56,8 +56,8 @@ class WellPath:
         self._headers = ["x", "y", "z"]
         self._filename = filename
         self._rkb = (0.0, 0.0, 0.0)
-        self._depthtype = None
-        self._windowdepth = -Inf
+        self._depth_type = None
+        self._window_depth = -Inf
         self._owc_definition = None
         self._owc_offset = None
         if filename and len(filename) > 3 and filename[-3:] == ".sc":
@@ -88,26 +88,30 @@ class WellPath:
         x, y, z = self._rkb[0], self._rkb[1], self._rkb[2]
         return (float(x), float(y), float(z))
 
-    def depthType(self):
-        return self._depthtype
+    @property
+    def depth_type(self):
+        return self._depth_type
 
-    def windowDepth(self):
-        return self._windowdepth
-
-    def setDepthType(self, depthtype):
+    @depth_type.setter
+    def depth_type(self, depth_type):
         """If None, resets windowdepth to -inf, else must be MD or TVD."""
-        if not depthtype:
-            self._windowdepth = -Inf
-            self._depthtype = None
-        elif depthtype in ["MD", "TVD"]:
-            self._depthtype = depthtype
+        if not depth_type:
+            self._window_depth = -Inf
+            self._depth_type = None
+        elif depth_type in ["MD", "TVD"]:
+            self._depth_type = depth_type
         else:
             raise ValueError(
-                'Window depth type must be None, "MD", or "TVD", not %s' % depthtype
+                'Window depth type must be None, "MD", or "TVD", not %s' % depth_type
             )
 
-    def setWindowDepth(self, depth):
-        self._windowdepth = float(depth)
+    @property
+    def window_depth(self):
+        return self._window_depth
+
+    @window_depth.setter
+    def window_depth(self, depth):
+        self._window_depth = float(depth)
 
     def owcDefinition(self):
         return self._owc_definition
