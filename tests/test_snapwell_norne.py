@@ -49,9 +49,9 @@ class TestSnapwellProgram(TestCase):
         wp_in = WellPath.parse(self.norneTestEdgeWellPath)
         wp_snapped = WellPath.parse(expected_well_output_fname)
 
-        self.assertEqual(wp_in.wellname(), wp_snapped.wellname())
-        self.assertEqual(expected_well_output_fname, wp_snapped.filename())
-        self.assertEqual("DISPOSAL - DRILLED", wp_snapped.welltype())
+        self.assertEqual(wp_in.well_name, wp_snapped.well_name)
+        self.assertEqual(expected_well_output_fname, wp_snapped.file_name)
+        self.assertEqual("DISPOSAL - DRILLED", wp_snapped.well_type)
         self.assertEqual(len(wp_in), len(wp_snapped))
         # Expects additional headers / columns in output.
         self.assertNotEqual(wp_in.headers(), wp_snapped.headers())
@@ -59,7 +59,7 @@ class TestSnapwellProgram(TestCase):
             ["x", "y", "z", "LENGTH", "TVD_DIFF", "OLD_TVD", "OWC"],
             wp_snapped.headers(),
         )
-        self.assertEqual(wp_in.rkb(), wp_snapped.rkb())
+        self.assertEqual(wp_in.rkb, wp_snapped.rkb)
         return wp_in, wp_snapped
 
     def check_snapwell_wellpath_ok(self, wp_in, wp_snapped):

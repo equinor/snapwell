@@ -206,13 +206,13 @@ def snap(
     The date we use is the last restart step before the given date.
 
     """
-    c_owc_offset = wp.owcOffset()
+    c_owc_offset = wp.owc_offset
     if c_owc_offset is None:
         c_owc_offset = owc_offset
     else:
         logging.info("Overriding global OWC_OFFSET. Using value %.2f", c_owc_offset)
 
-    c_owc_definition = wp.owcDefinition()
+    c_owc_definition = wp.owc_definition
     if c_owc_definition is None:
         c_owc_definition = owc_definition[1]
     else:
@@ -259,7 +259,7 @@ def snap(
         if new_mode and not snap_mode:
             logging.info("Enabling snap mode at point %d (depth %.2f)", idx, z)
             logging.info(
-                "                      %s %f", str(wp.depth_type()), wp.window_depth()
+                "                      %s %f", str(wp.depth_type), wp.window_depth
             )
             snap_mode = new_mode
 

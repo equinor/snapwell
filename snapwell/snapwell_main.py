@@ -90,7 +90,7 @@ class SnapwellRunner:
             rows = wp.write(
                 overwrite=self.config.overwrite(), resinsight=self.resinsight
             )
-            logging.info("Wrote %d rows to %s.out", rows, wp.filename())
+            logging.info("Wrote %d rows to %s.out", rows, wp.file_name)
             # done with this wellpath
 
         except ValueError as err:
@@ -113,7 +113,7 @@ class SnapwellRunner:
             wp_date = self.config.date(i)
             sep = "=" * 79
             logging.info("\n\n%s", sep)
-            logging.info("%d/%d \t Snapping %s", i + 1, num_snaps, wp.wellname())
+            logging.info("%d/%d \t Snapping %s", i + 1, num_snaps, wp.well_name)
             start = time()
             success = success and self.run_and_write(wp, wp_date)
             stop = time()

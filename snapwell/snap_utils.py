@@ -112,11 +112,11 @@ def enterSnapMode(mode, wp, idx):
     """Checks if we are in snap mode.  This happens if we are already snapping, or
     if we have reached a prescribed window depth.
     """
-    if mode or not wp.depth_type():
+    if mode or not wp.depth_type:
         return True
-    t = wp.depth_type()
+    t = wp.depth_type
 
-    return wp[t][idx] > wp.window_depth()
+    return wp[t][idx] > wp.window_depth
 
 
 def finiteFloat(elt):

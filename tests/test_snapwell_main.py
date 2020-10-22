@@ -110,8 +110,7 @@ def test_runner_correct_wellpaths():
     ).runner()
     assert len(runner.wellpaths) == 1
     wp = runner.wellpaths[0]
-    assert wp.welltype() == "A - B"
-    assert wp.version() == "2.0"
+    assert wp.well_type == "A - B"
     rows = list(wp.rows())
     assert len(rows) == 4
     assert all(len(r) == 6 for r in rows)

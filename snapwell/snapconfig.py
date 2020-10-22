@@ -134,18 +134,18 @@ class SnapConfig:
     def getWellpath(self, idx):
         fname = self.filename(idx)
         wp = WellPath.parse(fname)
-        if wp.wellname() and len(wp.wellname()) > 1 and len(wp.wellname().split()) == 1:
-            wp.setFilename(path.abspath(path.join(self._output, wp.wellname())))
+        if wp.well_name and len(wp.well_name) > 1 and len(wp.well_name.split()) == 1:
+            wp.file_name = path.abspath(path.join(self._output, wp.well_name))
         if self.depthType(idx):
-            wp.setDepthType(self.depthType(idx))
-            wp.setWindowDepth(self.windowDepth(idx))
+            wp.depth_type = self.depthType(idx)
+            wp.window_depth = self.windowDepth(idx)
             print(
                 "Configuring depth: %s [%s]"
-                % (str(wp.window_depth()), str(wp.depth_type()))
+                % (str(wp.window_depth), str(wp.depth_type))
             )
 
-        wp.setOwcDefinition(self.igetOwcDefinition(idx))
-        wp.setOwcOffset(self.igetOwcOffset(idx))
+        wp.owc_definition = self.igetOwcDefinition(idx)
+        wp.owc_offset = self.igetOwcOffset(idx)
 
         return wp
 
