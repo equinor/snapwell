@@ -48,7 +48,7 @@ class WellPath:
 
     """
 
-    def __init__(self, version=1.0, welltype="", wellname="", filename=None):
+    def __init__(self, version=1.0, welltype="", wellname="", date=None, filename=None):
         self._table = {"x": [], "y": [], "z": []}
         self._version = version
         self.well_type = welltype
@@ -60,6 +60,7 @@ class WellPath:
         self._window_depth = -Inf
         self.owc_definition = None
         self.owc_offset = None
+        self.date = date
         if filename and len(filename) > 5 and filename[-5:] == ".yaml":
             logging.warning(
                 "WellPath file extension is .yaml.  Potentially a Snapwell config file."
@@ -223,7 +224,7 @@ class WellPath:
 
     @staticmethod
     @takes_stream(0, "r+")
-    def parse(f):
+    def parse(f, date=None):
         """Given a file, parses and returns a WellPath object.
         * easting  (X UTM)
         * northing (Y UTM)
@@ -248,7 +249,11 @@ class WellPath:
             rkb_z = tryFloat(wellconfig[3])
 
         wp = WellPath(
-            version=version, welltype=well_type, wellname=well_name, filename=fname
+            version=version,
+            welltype=well_type,
+            wellname=well_name,
+            filename=fname,
+            date=date,
         )
         wp.rkb = (rkb_x, rkb_y, rkb_z)
 

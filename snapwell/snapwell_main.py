@@ -74,7 +74,7 @@ class SnapwellRunner:
         self.wellpaths = wellpaths
         self.resinsight = resinsight
 
-    def run_and_write(self, wp, wp_date):
+    def run_and_write(self, wp):
         if not self.config.output_dir.exists():
             makedirs(str(self.config.output_dir))
         try:
@@ -83,7 +83,7 @@ class SnapwellRunner:
                 wp,
                 self.grid,
                 self.restart,
-                wp_date,
+                wp.date,
                 permx_kw=self.permx,
                 owc_offset=self.config.owc_offset,
                 keywords=self.config.log_keywords,
@@ -112,12 +112,11 @@ class SnapwellRunner:
         logging.info("output     = %s", self.config.output_dir)
         success = True
         for i, wp in enumerate(self.wellpaths):
-            wp_date = self.config.wellpath_files[i].date
             sep = "=" * 79
             logging.info("\n\n%s", sep)
             logging.info("%d/%d \t Snapping %s", i + 1, num_snaps, wp.well_name)
             start = time()
-            success = success and self.run_and_write(wp, wp_date)
+            success = success and self.run_and_write(wp)
             stop = time()
             sec = round(stop - start, 2)
             logging.info("Operation took %s seconds", str(sec))
