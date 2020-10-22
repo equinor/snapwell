@@ -51,15 +51,15 @@ class WellPath:
     def __init__(self, version=1.0, welltype="", wellname="", filename=None):
         self._table = {"x": [], "y": [], "z": []}
         self._version = version
-        self._welltype = welltype
-        self._wellname = wellname
+        self.well_type = welltype
+        self.well_name = wellname
         self._headers = ["x", "y", "z"]
         self._filename = filename
         self._rkb = (0.0, 0.0, 0.0)
         self._depth_type = None
         self._window_depth = -Inf
-        self._owc_definition = None
-        self._owc_offset = None
+        self.owc_definition = None
+        self.owc_offset = None
         if filename and len(filename) > 3 and filename[-3:] == ".sc":
             logging.warning(
                 "WellPath file extension is .sc.  Potentially a Snapwell config file."
@@ -117,22 +117,6 @@ class WellPath:
     def window_depth(self, depth):
         self._window_depth = float(depth)
 
-    @property
-    def owc_definition(self):
-        return self._owc_definition
-
-    @owc_definition.setter
-    def owc_definition(self, val):
-        self._owc_definition = val
-
-    @property
-    def owc_offset(self):
-        return self._owc_offset
-
-    @owc_offset.setter
-    def owc_offset(self, val):
-        self._owc_offset = val
-
     def addColumn(self, header, data=None):
         if not data:
             data = []
@@ -178,14 +162,6 @@ class WellPath:
     def rows(self):
         for i in range(len(self)):
             yield [self._table[c][i] for c in self._headers]
-
-    @property
-    def well_type(self):
-        return self._welltype
-
-    @property
-    def well_name(self):
-        return self._wellname
 
     def updateRkb(self):
         """Updates the RKB values to the correct ones, that is, rkb=(x, y, z_r) where x
@@ -246,7 +222,7 @@ class WellPath:
         return len(self._table["x"])
 
     def __str__(self):
-        return self._wellname
+        return self.well_name
 
     @staticmethod
     @takes_stream(0, "r+")
@@ -313,7 +289,7 @@ class WellPath:
             return "%.2f" % s
 
         if resinsight:
-            out.write(self._wellname)
+            out.write(self.well_name)
             out.write(nl)
             for r in self.rows():
                 out.write(
@@ -322,9 +298,9 @@ class WellPath:
         else:
             out.write(self._version)
             out.write(nl)
-            out.write(self._welltype)
+            out.write(self.well_type)
             out.write(nl)
-            out.write(self._wellname)
+            out.write(self.well_name)
             out.write(" ")
             out.write(" ".join(map(fmt, self._rkb)))
             out.write(nl)
