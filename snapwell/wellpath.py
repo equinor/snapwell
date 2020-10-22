@@ -65,13 +65,21 @@ class WellPath:
                 "WellPath file extension is .sc.  Potentially a Snapwell config file."
             )
 
-    def filename(self):
+    @property
+    def file_name(self):
         return self._filename
 
-    def setFilename(self, fname):
+    @file_name.setter
+    def file_name(self, fname):
         self._filename = fname
 
-    def setRkb(self, rkb):
+    @property
+    def rkb(self):
+        x, y, z = self._rkb[0], self._rkb[1], self._rkb[2]
+        return float(x), float(y), float(z)
+
+    @rkb.setter
+    def rkb(self, rkb):
         """Set RKB (x,y,z) to be given triple.  Need a triple of float-able values."""
         if len(rkb) != 3:
             raise IndexError("Need a triple (x,y,z) of floats, not %s" % str(rkb))
@@ -83,10 +91,6 @@ class WellPath:
                 "Need x,y,z to be floats, got (%s, %s, %s)"
                 % (str(type(rkb[0])), str(type(rkb[1])), str(type(rkb[2])))
             ) from err
-
-    def rkb(self):
-        x, y, z = self._rkb[0], self._rkb[1], self._rkb[2]
-        return (float(x), float(y), float(z))
 
     @property
     def depth_type(self):
@@ -113,16 +117,20 @@ class WellPath:
     def window_depth(self, depth):
         self._window_depth = float(depth)
 
-    def owcDefinition(self):
+    @property
+    def owc_definition(self):
         return self._owc_definition
 
-    def owcOffset(self):
-        return self._owc_offset
-
-    def setOwcDefinition(self, val):
+    @owc_definition.setter
+    def owc_definition(self, val):
         self._owc_definition = val
 
-    def setOwcOffset(self, val):
+    @property
+    def owc_offset(self):
+        return self._owc_offset
+
+    @owc_offset.setter
+    def owc_offset(self, val):
         self._owc_offset = val
 
     def addColumn(self, header, data=None):
@@ -171,23 +179,13 @@ class WellPath:
         for i in range(len(self)):
             yield [self._table[c][i] for c in self._headers]
 
-    def version(self):
-        return self._version
-
-    def setVersion(self, version):
-        self._version = version
-
-    def welltype(self):
+    @property
+    def well_type(self):
         return self._welltype
 
-    def setWelltype(self, welltype):
-        self._welltype = welltype
-
-    def wellname(self):
+    @property
+    def well_name(self):
         return self._wellname
-
-    def setWellname(self, wellname):
-        self._wellname = wellname
 
     def updateRkb(self):
         """Updates the RKB values to the correct ones, that is, rkb=(x, y, z_r) where x
@@ -206,7 +204,7 @@ class WellPath:
         x, y = self._table["x"][0], self._table["y"][0]
         tvd, md = self._table["z"][0], self._table["MD"][0]
         if finiteFloat(md) and finiteFloat(tvd):
-            self.setRkb((x, y, md - tvd))
+            self.rkb = (x, y, md - tvd)
             return True
         else:
             return False
@@ -279,7 +277,7 @@ class WellPath:
         wp = WellPath(
             version=version, welltype=well_type, wellname=well_name, filename=fname
         )
-        wp.setRkb((rkb_x, rkb_y, rkb_z))
+        wp.rkb = (rkb_x, rkb_y, rkb_z)
 
         num_columns = 0
         num_columns_line = token(f)
@@ -349,9 +347,9 @@ class WellPath:
 
         """
         if not fname:
-            if not self._filename:
+            if not self.file_name:
                 raise ValueError(
-                    "WellPath.filename is unspecified and fname not provided.  "
+                    "WellPath.file_name is unspecified and fname not provided.  "
                     "Need at least one."
                 )
             fname = "%s.out" % self._filename

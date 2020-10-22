@@ -148,10 +148,10 @@ class SnapConfigTest(TestCase):
 
         wp = snap.getWellpath(6)
         # WELLPATH well6.w 2025-12-03 OWC_OFFSET 0.115 OWC_DEFINITION 0.828 MD 1884
-        self.assertEqual(wp.owcDefinition(), 0.828)
-        self.assertEqual(wp.owcOffset(), 0.115)
-        self.assertEqual(wp.depth_type(), "MD")
-        self.assertEqual(wp.window_depth(), 1884)
+        self.assertEqual(wp.owc_definition, 0.828)
+        self.assertEqual(wp.owc_offset, 0.115)
+        self.assertEqual(wp.depth_type, "MD")
+        self.assertEqual(wp.window_depth, 1884)
 
     def test_OwcDefinition(self):
         # test-full has OWC_DEFINITION SGAS 0.31415

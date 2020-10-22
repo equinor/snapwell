@@ -18,7 +18,7 @@ def test_well_path_file_extension_warning(caplog):
 def test_well_path_wrong_set_rkb_tuple():
     wp = WellPath(filename="well.w")
     with pytest.raises(ValueError, match="Need x,y,z to be floats"):
-        wp.setRkb(("r", "k", "b"))
+        wp.rkb = ("r", "k", "b")
 
 
 def test_well_path_duplicate_column():
@@ -51,7 +51,7 @@ def test_parse_wrong_num_columns():
 
 def test_write_unspecified_file():
     wp = WellPath(filename=None)
-    with pytest.raises(ValueError, match="filename is unspecified"):
+    with pytest.raises(ValueError, match="file_name is unspecified"):
         wp.write()
 
 
@@ -103,17 +103,16 @@ class WellpathTest(TestCase):
         fpath = join(self._base, "well.w")
         apath = abspath(fpath)
         wp = WellPath.parse(apath)
-        self.assertEqual("4.2", wp.version())
         self.assertEqual(122, len(wp))
-        self.assertEqual("TEST_WELL", wp.wellname())
-        self.assertEqual("A - B", wp.welltype())
-        self.assertEqual(apath, wp.filename())
+        self.assertEqual("TEST_WELL", wp.well_name)
+        self.assertEqual("A - B", wp.well_type)
+        self.assertEqual(apath, wp.file_name)
         r5 = [1067.0, 144.0, 0.0, 188.0, 94.0, 359.0]
         self.assertEqual(r5, wp[5])
 
         cols = ["x", "y", "z", "MD", "Incl", "Az"]
         self.assertEqual(cols, wp.headers())
-        self.assertEqual((1068.0, 0.0, 0.0), wp.rkb())
+        self.assertEqual((1068.0, 0.0, 0.0), wp.rkb)
 
     def test_WellpathEquality(self):
         wp1 = WellPath()
@@ -136,24 +135,19 @@ class WellpathTest(TestCase):
 
     def test_WellpathManipulation(self):
         wp = WellPath()
-        ver = "1.1"
-        typ = "TEST_typ"
-        nam = "my_NAM"
-        wp.setVersion(ver)
-        wp.setWelltype(typ)
-        wp.setWellname(nam)
+        typ = ""
+        nam = ""
 
         t_rkb = (1.0, 2.0, 3.0)
-        wp.setRkb((1.0, 2.0, "3.0"))
-        self.assertEqual(t_rkb, wp.rkb())
-        wp.setRkb((1.0, 2.0, "3.0"))
-        self.assertEqual(t_rkb, wp.rkb())
+        wp.rkb = (1.0, 2.0, "3.0")
+        self.assertEqual(t_rkb, wp.rkb)
+        wp.rkb = (1.0, 2.0, "3.0")
+        self.assertEqual(t_rkb, wp.rkb)
         with self.assertRaises(IndexError):
-            wp.setRkb((1.0, 2.0))
+            wp.rkb = (1.0, 2.0)
 
-        self.assertEqual(ver, wp.version())
-        self.assertEqual(typ, wp.welltype())
-        self.assertEqual(nam, wp.wellname())
+        self.assertEqual(typ, wp.well_type)
+        self.assertEqual(nam, wp.well_name)
 
         self.assertEqual(["x", "y", "z"], wp.headers())
 
@@ -211,7 +205,7 @@ class WellpathTest(TestCase):
         wp.depth_type = "MD"
         self.assertEqual("MD", wp.depth_type)
         self.assertEqual(-Inf, wp.window_depth)
-        wp.window_depth(250)
+        wp.window_depth = 250
         self.assertEqual(250.0, wp.window_depth)
         with self.assertRaises(ValueError):
             wp.depth_type = "X"
@@ -230,20 +224,20 @@ class WellpathTest(TestCase):
         x2, y2, z2, md2 = 530608.91, 6749150.04, 1565.00, 1632.39
         wp.addRaw((x1, y1, z1, md1))
         rkb_expect = (x1, y1, md1 - z1)
-        rkb_actual = wp.rkb()
+        rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
         self.assertTrue(wp.updateRkb())
-        rkb_actual = wp.rkb()
+        rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
         wp.addRaw((x2, y2, z2, md2))
-        rkb_actual = wp.rkb()
+        rkb_actual = wp.rkb
         self.assertAlmostEqualList(rkb_expect, rkb_actual)
 
         # update e.g. y1
         y1 = 6749052.00
         wp[0] = (x1, y1, z1, md1)
         rkb_expect = (x1, y1, md1 - z1)
-        rkb_actual = wp.rkb()
+        rkb_actual = wp.rkb
         self.assertEqual(rkb_expect, rkb_actual)
 
         # provided data wanted
@@ -251,7 +245,7 @@ class WellpathTest(TestCase):
         apath = abspath(fpath)
         wp = WellPath.parse(apath)
         # RKB should be 1602.39-1563.00=39.39.
-        self.assertAlmostEqualList(wp.rkb(), (530609.5, 6749152.0, 39.39))
+        self.assertAlmostEqualList(wp.rkb, (530609.5, 6749152.0, 39.39))
 
 
 if __name__ == "__main__":
