@@ -61,7 +61,7 @@ class WellPath:
         self.owc_definition = None
         self.owc_offset = None
         self.date = date
-        if filename and len(filename) > 5 and filename[-5:] == ".yaml":
+        if filename and filename.endswith(".yaml"):
             logging.warning(
                 "WellPath file extension is .yaml.  Potentially a Snapwell config file."
             )
