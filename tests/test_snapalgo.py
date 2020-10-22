@@ -1,12 +1,11 @@
 import unittest
-from datetime import datetime
-from os.path import abspath, join
 
 import pytest
 from ecl import EclTypeEnum
 from ecl.eclfile import Ecl3DKW, EclKW
 from ecl.grid import EclGridGenerator
-from snapwell import Inf, WellPath, snapecl
+
+from snapwell import snapecl
 
 from .testcase import TestCase
 

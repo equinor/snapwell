@@ -14,9 +14,71 @@
 
 
 import logging
+from math import inf, nan, sqrt
 
-from .snap_utils import Inf, Nan, dist, enterSnapMode, findKeyword, roundAwayFromEven
 from .snapconfig import OwcDefinition
+
+
+def dist(p1, p2):
+    """Returns Euclidean distance between p1 and p2, i.e. Pythagoras.
+    Works on coordinates of any dimension.  If p1 and p2 have different
+    dimensionality, we pick the min(len(p1), len(p2)) first points of each
+    coordinate.
+    """
+    return sqrt(sum([(e[0] - e[1]) ** 2 for e in zip(p1, p2)]))
+
+
+def roundAwayFromEven(val):
+    """Eclipse cannot deal with values close to even integers.  We
+    (in)sanitize the value so that it always will be at least 0.1m away
+    from an even integer.
+
+    This function only makes sense should you assume cell floors are at even
+    integers.
+    """
+    epsilon = 0.1
+    r = val % 2.0
+    if r < epsilon:
+        return round(val) + epsilon
+    if r > (2.0 - epsilon):
+        return round(val) - epsilon
+    return val
+
+
+def findRestartStep(restart, date):
+    """
+    Finds the last restart step in the given restart file before the given date
+    """
+    # start at 1, since we return step - 1
+    for step in range(1, restart.num_report_steps()):
+        new_date = restart.iget_restart_sim_time(step).date()  # step date
+        if new_date > date:
+            return step - 1
+
+    # did not find it, return len - 1
+    return step
+
+
+def findKeyword(kw, restart, date, step=None):
+    """Find and return kw (EclKW) from restart file at the last step before given
+    date.
+    """
+    if not step:
+        step = findRestartStep(restart, date)
+    if not (0 <= step < restart.num_report_steps()):
+        raise ValueError("restart step out of range 0 <= %d < steps" % step)
+    return restart.iget_named_kw(kw, step)
+
+
+def enterSnapMode(mode, wp, idx):
+    """Checks if we are in snap mode.  This happens if we are already snapping, or
+    if we have reached a prescribed window depth.
+    """
+    if mode or not wp.depth_type:
+        return True
+    t = wp.depth_type
+
+    return wp[t][idx] > wp.window_depth
 
 
 def _activeIdx(grid, i, j, k):
@@ -148,19 +210,19 @@ def find_owc(grid, owc_kw, x, y, z, threshold=0.7, owc_offset=0.5):
     col = active_cell_column(grid, owc_kw, x, y, z)
     if not col:
         logging.warning(
-            "No active cell for %s at (%f, %f, %f), owc is Nan", owc_kw, x, y, z
+            "No active cell for %s at (%f, %f, %f), owc is nan", owc_kw, x, y, z
         )
-        return Nan, z
+        return nan, z
     threshold_idx = first_swat_below_treshold(col, threshold=threshold)
     if threshold_idx is None:
         logging.warning(
-            "No active cell has swat below treshold for %s at (%f, %f, %f), owc is Nan",
+            "No active cell has swat below treshold for %s at (%f, %f, %f), owc is nan",
             owc_kw,
             x,
             y,
             z,
         )
-        return Nan, z
+        return nan, z
     # snap to first cell center above 'owc_exact - owc_offset'
     owc_exact = interpolate_owc(grid, col, threshold_idx, threshold=threshold)
     cell_center = find_center_z(grid, col, owc_exact - owc_offset)
@@ -185,7 +247,7 @@ def snap(
     owc_offset=0.5,
     permx_kw=None,
     keywords=None,
-    delta=Inf,
+    delta=inf,
     owc_definition=None,
 ):
     """Given a WellPath wp, an EclGrid grid, an EclFile (restart file) rest, and a
@@ -256,8 +318,8 @@ def snap(
     for idx, (x, y, z, *_) in enumerate(wp):
         logs["OLD_TVD"].append(z)
         new_tvd = z
-        owc_exact = Nan
-        z_range = (-Inf, Inf)
+        owc_exact = nan
+        z_range = (-inf, inf)
 
         # Ready to enter snap mode?
         new_mode = enterSnapMode(snap_mode, wp, idx)
@@ -330,13 +392,13 @@ def snap(
                 y,
                 new_tvd,
             )
-        permx = Nan
+        permx = nan
         if permx_kw and new_cell >= 0:
             permx = permx_kw[new_cell]
         logs["PERMX"].append(permx)
 
         # SWAT, SGAS, SOIL
-        swat_val, sgas_val, soil_val = Nan, Nan, Nan
+        swat_val, sgas_val, soil_val = nan, nan, nan
         if "SWAT" in keywords and new_cell >= 0:
             swat_val = swat[new_cell]
         logs["SWAT"].append(swat_val)

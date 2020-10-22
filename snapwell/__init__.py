@@ -33,7 +33,7 @@
 
 
 """
-from pkg_resources import get_distribution, DistributionNotFound
+from pkg_resources import DistributionNotFound, get_distribution
 
 __author__ = "PG Drange, K Flikka, and KW Kongsvik"
 __email__ = "pgdr@statoil.com"
@@ -43,12 +43,15 @@ __maintainer__ = "GBS IT SI SIB"
 __status__ = "Prototype"
 __credits__ = ["PG Drange", "K Flikka", "KW Kongsvik"]
 
-from .wellpath import WellPath
 from .snapconfig import SnapConfig
-from .snapecl import snap
-from .snap_utils import Inf, Nan, roundAwayFromEven
-from .snap_utils import finiteFloat, tryFloat, close, dist
-from .snap_utils import findRestartStep, findKeyword, enterSnapMode
+from .snapecl import (
+    enterSnapMode,
+    findKeyword,
+    findRestartStep,
+    roundAwayFromEven,
+    snap,
+)
+from .wellpath import WellPath, finiteFloat
 
 try:
     __version__ = get_distribution(__name__).version

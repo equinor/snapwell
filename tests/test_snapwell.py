@@ -9,19 +9,9 @@ import yaml
 from ecl.eclfile import EclFile
 
 # utils
-from snapwell import (
-    SnapConfig,
-    findKeyword,
-    findRestartStep,
-    roundAwayFromEven,
-    tryFloat,
-)
+from snapwell import SnapConfig, findKeyword, findRestartStep, roundAwayFromEven
 
 from .testcase import TestCase
-
-
-def test_parse_not_a_float():
-    assert tryFloat("Not a float", 0.0) == 0.0
 
 
 def test_keyword_out_of_range():
