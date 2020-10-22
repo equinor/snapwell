@@ -350,7 +350,7 @@ def snap(
             x2, y2, z2 = prev_wp[0], prev_wp[1], prev_wp[2]
             length = dist((x, y), (x2, y2))
             logs["LENGTH"].append(length)
-            if "MD" in wp.headers() and snap_mode:
+            if "MD" in wp.headers and snap_mode:
                 true_length = dist((x, y, new_tvd), (x2, y2, z2))
                 prev_md = wp["MD"][idx - 1]
                 new_md = prev_md + true_length

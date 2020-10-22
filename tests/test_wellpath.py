@@ -111,7 +111,7 @@ class WellpathTest(TestCase):
         self.assertEqual(r5, wp[5])
 
         cols = ["x", "y", "z", "MD", "Incl", "Az"]
-        self.assertEqual(cols, wp.headers())
+        self.assertEqual(cols, wp.headers)
         self.assertEqual((1068.0, 0.0, 0.0), wp.rkb)
 
     def test_WellpathEquality(self):
@@ -149,7 +149,7 @@ class WellpathTest(TestCase):
         self.assertEqual(typ, wp.well_type)
         self.assertEqual(nam, wp.well_name)
 
-        self.assertEqual(["x", "y", "z"], wp.headers())
+        self.assertEqual(["x", "y", "z"], wp.headers)
 
         self.assertEqual(len(wp), 0)
         wp.addRaw((13, 17, 19))
@@ -159,7 +159,7 @@ class WellpathTest(TestCase):
 
         # adding column 'd'
         wp.addColumn("d", [23])
-        self.assertEqual(["x", "y", "z", "d"], wp.headers())
+        self.assertEqual(["x", "y", "z", "d"], wp.headers)
         with self.assertRaises(IndexError):
             wp.addRaw((50, 51, 52))
         wp.addRaw((50, 51, 52, 53))
@@ -184,7 +184,7 @@ class WellpathTest(TestCase):
         with self.assertRaises(ValueError):
             wp.removeColumn("x")
         wp.removeColumn("d")
-        self.assertEqual(["x", "y", "z"], wp.headers())
+        self.assertEqual(["x", "y", "z"], wp.headers)
         with self.assertRaises(IndexError):
             wp.addRaw((90, 91, 92, 93))
         wp.addRaw((90, 91, 92))

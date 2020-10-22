@@ -54,10 +54,10 @@ class TestSnapwellProgram(TestCase):
         self.assertEqual("DISPOSAL - DRILLED", wp_snapped.well_type)
         self.assertEqual(len(wp_in), len(wp_snapped))
         # Expects additional headers / columns in output.
-        self.assertNotEqual(wp_in.headers(), wp_snapped.headers())
+        self.assertNotEqual(wp_in.headers, wp_snapped.headers)
         self.assertEqual(
             ["x", "y", "z", "LENGTH", "TVD_DIFF", "OLD_TVD", "OWC"],
-            wp_snapped.headers(),
+            wp_snapped.headers,
         )
         self.assertEqual(wp_in.rkb, wp_snapped.rkb)
         return wp_in, wp_snapped
