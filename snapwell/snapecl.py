@@ -370,7 +370,7 @@ def snap(
     )
     for kw in keywords:
         if kw in recognized_kw:
-            wp.addColumn(kw, logs[kw])
+            wp.add_column(kw, logs[kw])
         else:
             logging.warning('Unrecognized keyword "%s".  Ignoring', kw)
 

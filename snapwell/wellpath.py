@@ -117,7 +117,7 @@ class WellPath:
     def window_depth(self, depth):
         self._window_depth = float(depth)
 
-    def addColumn(self, header, data=None):
+    def add_column(self, header, data=None):
         if not data:
             data = []
         if header in self._table:
@@ -131,7 +131,7 @@ class WellPath:
         self._table[header] = data
         self.headers.append(header)
 
-    def removeColumn(self, header):
+    def remove_column(self, header):
         if header in ["x", "y", "z"]:
             raise ValueError(
                 "Cannot delete column %s.  A WellPath must contain x, y, and z."
@@ -142,7 +142,7 @@ class WellPath:
             hs = [h for h in self.headers if h != header]
             self.headers = hs
 
-    def addRaw(self, row):
+    def add_raw_row(self, row):
         """Adds a raw row, where row now is a list following header's order"""
         if len(row) != len(self._table):
             raise IndexError(
@@ -263,14 +263,14 @@ class WellPath:
 
         for _ in range(num_columns):
             header = token(f).split()[0]  # ignore unit,scale for now
-            wp.addColumn(header)
+            wp.add_column(header)
 
         while True:  # loop-and-a-half
             t = token(f)
             if t is None:
                 break
             data = [float(e) for e in t.split()]
-            wp.addRaw(data)
+            wp.add_raw_row(data)
         f.close()
 
         return wp
