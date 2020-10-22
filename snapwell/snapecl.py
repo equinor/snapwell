@@ -240,7 +240,7 @@ def find_owc(grid, owc_kw, x, y, z, threshold=0.7, owc_offset=0.5):
 
 
 def snap(
-    wp,
+    well_path,
     grid,
     rest,
     date,
@@ -269,7 +269,7 @@ def snap(
     The date we use is the last restart step before the given date.
 
     """
-    c_owc_offset = wp.owc_offset
+    c_owc_offset = well_path.owc_offset
 
     if owc_definition is None:
         owc_definition = OwcDefinition("SWAT", 0.7)
@@ -279,7 +279,7 @@ def snap(
     else:
         logging.info("Overriding global OWC_OFFSET. Using value %.2f", c_owc_offset)
 
-    c_owc_definition = wp.owc_definition
+    c_owc_definition = well_path.owc_definition
     if c_owc_definition is None:
         c_owc_definition = owc_definition.value
     else:
@@ -315,18 +315,20 @@ def snap(
         sgas = findKeyword("SGAS", rest, date)
 
     snapped_idx = 0
-    for idx, (x, y, z, *_) in enumerate(wp):
+    for idx, (x, y, z, *_) in enumerate(well_path):
         logs["OLD_TVD"].append(z)
         new_tvd = z
         owc_exact = nan
         z_range = (-inf, inf)
 
         # Ready to enter snap mode?
-        new_mode = enterSnapMode(snap_mode, wp, idx)
+        new_mode = enterSnapMode(snap_mode, well_path, idx)
         if new_mode and not snap_mode:
             logging.info("Enabling snap mode at point %d (depth %.2f)", idx, z)
             logging.info(
-                "                      %s %f", str(wp.depth_type), wp.window_depth
+                "                      %s %f",
+                str(well_path.depth_type),
+                well_path.window_depth,
             )
             snap_mode = new_mode
 
@@ -354,7 +356,7 @@ def snap(
         #          than the (x,y) distances times delta.
         #
         if snap_mode and idx > 1:  # caring about delta at this point
-            prev_wp = wp[idx - 1]
+            prev_wp = well_path[idx - 1]
             x2, y2 = prev_wp[0], prev_wp[1]
             d = dist(
                 (x, y), (x2, y2)
@@ -378,7 +380,7 @@ def snap(
 
         # Now we add this row's values on to the columns: perm, owc, length, old_tvd, diff etc.
         logs["TVD_DIFF"].append(new_tvd - z)
-        wp[idx] = (x, y, new_tvd)
+        well_path[idx] = (x, y, new_tvd)
         i, j, k = _ijk(grid, x, y, new_tvd)
         new_cell = _activeIdx(grid, i, j, k)  # Active index of (i,j,k), or -1
 
@@ -413,15 +415,15 @@ def snap(
 
         logs["OWC"].append(owc_exact)
         if idx > 0:
-            prev_wp = wp[idx - 1]
+            prev_wp = well_path[idx - 1]
             x2, y2, z2 = prev_wp[0], prev_wp[1], prev_wp[2]
             length = dist((x, y), (x2, y2))
             logs["LENGTH"].append(length)
-            if "MD" in wp.headers and snap_mode:
+            if "MD" in well_path.headers and snap_mode:
                 true_length = dist((x, y, new_tvd), (x2, y2, z2))
-                prev_md = wp["MD"][idx - 1]
+                prev_md = well_path["MD"][idx - 1]
                 new_md = prev_md + true_length
-                wp["MD"][idx] = new_md
+                well_path["MD"][idx] = new_md
         else:
             logs["LENGTH"].append(0)
 
@@ -437,8 +439,8 @@ def snap(
     )
     for kw in keywords:
         if kw in recognized_kw:
-            wp.add_column(kw, logs[kw])
+            well_path.add_column(kw, logs[kw])
         else:
             logging.warning('Unrecognized keyword "%s".  Ignoring', kw)
 
-    return wp
+    return well_path
