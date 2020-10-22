@@ -259,7 +259,7 @@ def snap(
         if new_mode and not snap_mode:
             logging.info("Enabling snap mode at point %d (depth %.2f)", idx, z)
             logging.info(
-                "                      %s %f", str(wp.depthType()), wp.windowDepth()
+                "                      %s %f", str(wp.depth_type()), wp.window_depth()
             )
             snap_mode = new_mode
 

@@ -141,7 +141,7 @@ class SnapConfig:
             wp.setWindowDepth(self.windowDepth(idx))
             print(
                 "Configuring depth: %s [%s]"
-                % (str(wp.windowDepth()), str(wp.depthType()))
+                % (str(wp.window_depth()), str(wp.depth_type()))
             )
 
         wp.setOwcDefinition(self.igetOwcDefinition(idx))

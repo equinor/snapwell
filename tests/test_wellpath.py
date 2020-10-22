@@ -206,21 +206,21 @@ class WellpathTest(TestCase):
 
     def test_WellpathDepth(self):
         wp = WellPath()
-        self.assertIsNone(wp.depthType())
-        self.assertEqual(-Inf, wp.windowDepth())
-        wp.setDepthType("MD")
-        self.assertEqual("MD", wp.depthType())
-        self.assertEqual(-Inf, wp.windowDepth())
-        wp.setWindowDepth(250)
-        self.assertEqual(250.0, wp.windowDepth())
+        self.assertIsNone(wp.depth_type)
+        self.assertEqual(-Inf, wp.window_depth)
+        wp.depth_type = "MD"
+        self.assertEqual("MD", wp.depth_type)
+        self.assertEqual(-Inf, wp.window_depth)
+        wp.window_depth(250)
+        self.assertEqual(250.0, wp.window_depth)
         with self.assertRaises(ValueError):
-            wp.setDepthType("X")
+            wp.depth_type = "X"
         with self.assertRaises(ValueError):
-            wp.setDepthType(4)
-        self.assertEqual(250.0, wp.windowDepth())
-        wp.setDepthType(None)
-        self.assertIsNone(wp.depthType())
-        self.assertEqual(-Inf, wp.windowDepth())
+            wp.depth_type = 4
+        self.assertEqual(250.0, wp.window_depth)
+        wp.depth_type = None
+        self.assertIsNone(wp.depth_type)
+        self.assertEqual(-Inf, wp.window_depth)
 
     def test_WellpathRkb(self):
         wp = WellPath()
