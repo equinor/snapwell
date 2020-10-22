@@ -114,25 +114,6 @@ class WellpathTest(TestCase):
         self.assertEqual(cols, wp.headers)
         self.assertEqual((1068.0, 0.0, 0.0), wp.rkb)
 
-    def test_WellpathEquality(self):
-        wp1 = WellPath()
-        wp2 = WellPath()
-        self.assertEqual(wp1, wp2)
-        wp1.addRaw((2, 4, 6))
-        self.assertNotEqual(wp1, wp2)
-        wp2.addColumn("c")
-        self.assertNotEqual(wp1, wp2)
-        wp2.addRaw((2, 4, 6, 8))
-        self.assertNotEqual(wp1, wp2)
-        wp1.addColumn("c", [8])
-        self.assertEqual(wp1, wp2)
-
-        fpath = join(self._base, "well.w")
-        apath = abspath(fpath)
-        wp1 = WellPath.parse(apath)
-        wp2 = WellPath.parse(apath)
-        self.assertEqual(wp1, wp2)
-
     def test_WellpathManipulation(self):
         wp = WellPath()
         typ = ""
