@@ -164,7 +164,7 @@ class SnapwellApp:
         logging.info("Loading grid %s", config.grid_file)
         try:
             return config.grid
-        except Exception as err:
+        except IOError as err:
             logging.error("supplied GRID file not loaded: %s", err)
 
     def load_permx(self, config):
