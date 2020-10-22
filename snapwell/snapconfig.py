@@ -86,7 +86,7 @@ class SnapConfig:
         logging.info("Loading %d wells", len(self.wellpath_files))
 
         def read_wellpath_file(wpf):
-            wp = WellPath.parse(str(wpf.well_file))
+            wp = WellPath.parse(str(wpf.well_file), date=wpf.date)
             if (
                 wp.well_name
                 and len(wp.well_name) > 1
