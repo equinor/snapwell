@@ -162,7 +162,7 @@ class SnapwellApp:
             fname = config.filename(i)
             logging.info(fname, end=" ... ")
             wp = config.getWellpath(i)
-            logging.info("(%d points, %d logs)", len(wp), len(wp.headers()))
+            logging.info("(%d points, %d logs)", len(wp), len(wp.headers))
             wellpaths.append(wp)
             logging.info("done")
         return wellpaths

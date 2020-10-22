@@ -53,7 +53,7 @@ class WellPath:
         self._version = version
         self.well_type = welltype
         self.well_name = wellname
-        self._headers = ["x", "y", "z"]
+        self.headers = ["x", "y", "z"]
         self._filename = filename
         self._rkb = (0.0, 0.0, 0.0)
         self._depth_type = None
@@ -129,7 +129,7 @@ class WellPath:
                 "Data needs to be of len(wp)=%d, was given %d entries." % (lx, ld)
             )
         self._table[header] = data
-        self._headers.append(header)
+        self.headers.append(header)
 
     def removeColumn(self, header):
         if header in ["x", "y", "z"]:
@@ -139,8 +139,8 @@ class WellPath:
             )
         if header in self._table:
             del self._table[header]
-            hs = [h for h in self._headers if h != header]
-            self._headers = hs
+            hs = [h for h in self.headers if h != header]
+            self.headers = hs
 
     def addRaw(self, row):
         """Adds a raw row, where row now is a list following header's order"""
@@ -149,19 +149,16 @@ class WellPath:
                 "Cannot insert %s into table of %d columns." % (row, len(self._table))
             )
         idx = 0
-        for key in self._headers:
+        for key in self.headers:
             self._table[key].append(row[idx])
             idx += 1
 
         if len(self) == 1:
             self.updateRkb()
 
-    def headers(self):
-        return self._headers
-
     def rows(self):
         for i in range(len(self)):
-            yield [self._table[c][i] for c in self._headers]
+            yield [self._table[c][i] for c in self.headers]
 
     def updateRkb(self):
         """Updates the RKB values to the correct ones, that is, rkb=(x, y, z_r) where x
@@ -175,7 +172,7 @@ class WellPath:
         """
         if len(self) == 0:
             return False
-        if "MD" not in self._headers:
+        if "MD" not in self.headers:
             return False
         x, y = self._table["x"][0], self._table["y"][0]
         tvd, md = self._table["z"][0], self._table["MD"][0]
@@ -189,16 +186,16 @@ class WellPath:
 
         """Sets elt in the idx'th position of column col."""
         rs = len(self)
-        cs = len(self._headers)
+        cs = len(self.headers)
         if not 0 <= idx < rs:
             raise IndexError("row index out of range, 0 <= idx < %d" % rs)
 
         if isinstance(col, (int)):
             if not 0 <= col < cs:
                 raise IndexError("column index out of range, 0 <= col < %d" % cs)
-            col = self._headers[col]
+            col = self.headers[col]
 
-        if col not in self._headers:
+        if col not in self.headers:
             raise KeyError("Key %s does not name a column" % str(col))
 
         self._table[col][idx] = elt
@@ -206,13 +203,13 @@ class WellPath:
     def __getitem__(self, idx):
         if isinstance(idx, str):
             return self._table[idx]
-        return [self._table[key][idx] for key in self._headers]
+        return [self._table[key][idx] for key in self.headers]
 
     def __setitem__(self, idx, elt):
-        lx = len(self._headers)
+        lx = len(self.headers)
         ld = len(elt)
         for i in range(min(lx, ld)):
-            h = self._headers[i]
+            h = self.headers[i]
             self._table[h][idx] = elt[i]
         if idx == 0:
             self.updateRkb()
@@ -304,10 +301,10 @@ class WellPath:
             out.write(" ")
             out.write(" ".join(map(fmt, self._rkb)))
             out.write(nl)
-            out.write(str(len(self._headers) - 3))
+            out.write(str(len(self.headers) - 3))
             out.write(nl)
-            for i in range(3, len(self._headers)):
-                out.write(f"{self._headers[i]} 1 lin" + nl)
+            for i in range(3, len(self.headers)):
+                out.write(f"{self.headers[i]} 1 lin" + nl)
             for r in self.rows():
                 out.write(" ".join(map(fmt, r)) + nl)
 
@@ -344,13 +341,13 @@ class WellPath:
     def __eq__(self, other):
         try:
             len_s, len_o = len(self), len(other)
-            wid_s, wid_o = len(self._headers), len(other._headers)
+            wid_s, wid_o = len(self.headers), len(other.headers)
             if len_s != len_o:
                 return False
             if wid_s != wid_o:
                 return False
-            for h in self._headers:
-                if h not in other._headers:
+            for h in self.headers:
+                if h not in other.headers:
                     return False
                 col_s = self._table[h]
                 col_o = other._table[h]
