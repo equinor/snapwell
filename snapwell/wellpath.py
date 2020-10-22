@@ -337,30 +337,3 @@ class WellPath:
             self.write_to_stream(fname_out, resinsight)
 
         return len(self)
-
-    def __eq__(self, other):
-        try:
-            len_s, len_o = len(self), len(other)
-            wid_s, wid_o = len(self.headers), len(other.headers)
-            if len_s != len_o:
-                return False
-            if wid_s != wid_o:
-                return False
-            for h in self.headers:
-                if h not in other.headers:
-                    return False
-                col_s = self._table[h]
-                col_o = other._table[h]
-                for i in range(len_s):
-                    if not close(col_s[i], col_o[i]):
-                        logging.info(
-                            "Object differ in col %s, row %d: %f vs %f",
-                            h,
-                            i,
-                            col_s[i],
-                            col_o[i],
-                        )
-                        return False
-            return True
-        except AttributeError:
-            return False
