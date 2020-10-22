@@ -364,7 +364,3 @@ def main():
     exit_val = run(SnapwellApp(sys.argv))
     f.reset_count()
     sys.exit(exit_val)
-
-
-if __name__ == "__main__":
-    main()
