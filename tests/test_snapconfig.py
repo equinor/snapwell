@@ -1,11 +1,12 @@
 from datetime import date
+from math import inf
 from os.path import dirname, join
 from pathlib import Path
 
 import pytest
 import yaml
 
-from snapwell import Inf, SnapConfig
+from snapwell import SnapConfig
 
 testdata_path = join(dirname(__file__), "testdata")
 conf_path = join(testdata_path, "snapwell")
@@ -182,12 +183,12 @@ def test_full_config_wellpath_depth_types(full_config):
 
 def test_full_config_wellpath_depths(full_config):
     expected = [
-        -Inf,
+        -inf,
         pytest.approx(2000.00),
         pytest.approx(158.20),
         pytest.approx(1680.00),
         pytest.approx(1680.00),
-        -Inf,
+        -inf,
         pytest.approx(1884),
         pytest.approx(4000),
     ]
@@ -240,7 +241,7 @@ def config():
 
 def test_config(config):
     assert config.owc_offset == pytest.approx(0.5)
-    assert config.delta_z == Inf
+    assert config.delta_z == inf
 
     config.set_base_path(conf_path)
     assert same_path(join(eclipse_path, "SPE3CASE1.EGRID"), config.grid_file)

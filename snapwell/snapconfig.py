@@ -15,6 +15,7 @@
 import logging
 from dataclasses import field
 from datetime import date
+from math import inf
 from os import path
 from pathlib import Path
 from typing import List, Optional
@@ -24,7 +25,6 @@ from ecl.grid import EclGrid
 from pydantic.dataclasses import dataclass
 from typing_extensions import Literal
 
-from .snap_utils import Inf
 from .wellpath import WellPath
 
 
@@ -48,7 +48,7 @@ class WellPathFile:
     owc_definition: Optional[float] = None
     owc_offset: Optional[float] = None
     depth_type: Optional[Literal["TVD", "MD"]] = None
-    window_depth: float = -Inf
+    window_depth: float = -inf
 
 
 @dataclass(config=SnapWellConfig)
@@ -62,7 +62,7 @@ class SnapConfig:
     owc_offset: float = 0.5
     owc_definition: OwcDefinition = OwcDefinition()
     log_keywords: List[str] = field(default_factory=list)
-    delta_z: float = Inf
+    delta_z: float = inf
 
     def set_base_path(self, new_base):
         """

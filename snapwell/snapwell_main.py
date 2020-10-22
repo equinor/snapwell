@@ -23,7 +23,7 @@ from time import time
 import yaml
 
 from snapwell import __version__ as VERSION
-from snapwell import snap, tryFloat
+from snapwell import snap
 from snapwell.snapconfig import OwcDefinition, SnapConfig
 
 
@@ -233,11 +233,12 @@ class SnapwellApp:
                     "owc definition is malformed: more than one ':'"
                 )
             odkw, odval = t[0], t[1]
-            odval = tryFloat(odval, ret=None)
-            if odval is None:
+            try:
+                odval = float(odval)
+            except Exception as err:
                 raise argparse.ArgumentTypeError(
                     f"owc definition is malformed: could not parse value {odval}"
-                )
+                ) from err
             if not odkw.isalpha():
                 raise argparse.ArgumentTypeError(
                     f"owc definition is malform: could not parse key word {odkw}"

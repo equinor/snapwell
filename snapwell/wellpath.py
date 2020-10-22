@@ -14,11 +14,37 @@
 
 import logging
 from functools import wraps
+from math import inf, isinf, isnan
 from os.path import exists
 
-from .snap_utils import Inf, close, finiteFloat
-from .snap_utils import read_next_tokenline as token
-from .snap_utils import tryFloat
+
+def finiteFloat(elt):
+    return not (isinf(elt) or isnan(elt))
+
+
+def _ignorable_(line):
+    line = line.strip()
+    if not line or (len(line) >= 2 and line[:2] == "--"):
+        return True  # ignorable, yes
+    return False
+
+
+def token(f):
+    token = ""
+    while _ignorable_(token):
+        token = f.readline()
+        if not token:
+            return None
+        token = strip_line(token)
+    return token
+
+
+def strip_line(l):
+    """strips string and replace tabs and multiple spaces with single space."""
+    l = l.replace("\t", " ")
+    while "  " in l:
+        l = l.replace("  ", " ")
+    return l.strip()
 
 
 def takes_stream(i, mode):
@@ -57,7 +83,7 @@ class WellPath:
         self._filename = filename
         self._rkb = (0.0, 0.0, 0.0)
         self._depth_type = None
-        self._window_depth = -Inf
+        self._window_depth = -inf
         self.owc_definition = None
         self.owc_offset = None
         self.date = date
@@ -101,7 +127,7 @@ class WellPath:
     def depth_type(self, depth_type):
         """If None, resets windowdepth to -inf, else must be MD or TVD."""
         if not depth_type:
-            self._window_depth = -Inf
+            self._window_depth = -inf
             self._depth_type = None
         elif depth_type in ["MD", "TVD"]:
             self._depth_type = depth_type
@@ -241,12 +267,15 @@ class WellPath:
         wellconfig = token(f).split()
         well_name = wellconfig[0]
         rkb_x, rkb_y, rkb_z = 0, 0, 0
-        if len(wellconfig) > 1:
-            rkb_x = tryFloat(wellconfig[1])
-        if len(wellconfig) > 2:
-            rkb_y = tryFloat(wellconfig[2])
-        if len(wellconfig) > 3:
-            rkb_z = tryFloat(wellconfig[3])
+        try:
+            if len(wellconfig) > 1:
+                rkb_x = float(wellconfig[1])
+            if len(wellconfig) > 2:
+                rkb_y = float(wellconfig[2])
+            if len(wellconfig) > 3:
+                rkb_z = float(wellconfig[3])
+        except Exception as err:
+            raise ValueError(f"Could not parse RKB values: {err}") from err
 
         wp = WellPath(
             version=version,

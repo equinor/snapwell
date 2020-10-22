@@ -1,11 +1,13 @@
 import unittest
 from datetime import datetime
 from io import StringIO
+from math import inf
 from os.path import abspath, dirname, join
 
 import numpy as np
 import pytest
-from snapwell import Inf, WellPath
+
+from snapwell import WellPath
 
 from .testcase import TestCase
 
@@ -182,10 +184,10 @@ class WellpathTest(TestCase):
     def test_WellpathDepth(self):
         wp = WellPath()
         self.assertIsNone(wp.depth_type)
-        self.assertEqual(-Inf, wp.window_depth)
+        self.assertEqual(-inf, wp.window_depth)
         wp.depth_type = "MD"
         self.assertEqual("MD", wp.depth_type)
-        self.assertEqual(-Inf, wp.window_depth)
+        self.assertEqual(-inf, wp.window_depth)
         wp.window_depth = 250
         self.assertEqual(250.0, wp.window_depth)
         with self.assertRaises(ValueError):
@@ -195,7 +197,7 @@ class WellpathTest(TestCase):
         self.assertEqual(250.0, wp.window_depth)
         wp.depth_type = None
         self.assertIsNone(wp.depth_type)
-        self.assertEqual(-Inf, wp.window_depth)
+        self.assertEqual(-inf, wp.window_depth)
 
     def test_WellpathRkb(self):
         wp = WellPath()
