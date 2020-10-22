@@ -299,8 +299,8 @@ def snap(
         "LENGTH": [],  # XY-length from previous wellpoint (2D)
         "SWAT": [],  # SWAT of result
         "SGAS": [],  # SGAS of result
-        "SOIL": [],
-    }  # 1 - (SGAS+SWAT)
+        "SOIL": [],  # 1 - (SGAS+SWAT)
+    }
 
     snap_mode = False  # set to true below when we start optimizing more
     #                   specifically, set to true when three points in the input
