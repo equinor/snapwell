@@ -32,65 +32,58 @@ permeability.
 
 # Fileformat
 ## snapwell input file
-
-The config file format for snapwell (SnapConfig) is as follows:
-* Everything on a line following a "--" is ignored
-* A line should start with a keyword and be followed by the keyword's arguments
-* Two keywords are mandatory, `GRID` and `RESTART`, and should be followed by a
-  path to the grid (GRID/EGRID) and restart files (UNRST), respectively (see
-  example below).
-* The `INIT` keyword is required for permeability output, and should be followed
-  by a path to an init file.
-* The following additional header keywords are supported:
-    * `OUTPUT` --- the output directory (path), is set to cwd by default
-    * `OVERWRITE` --- a boolean (True/False) specifying whether the program is
-      allowed to overwrite already existing files.  Defaulted to False; use with
-      care.
-    * `DELTA_Z` --- the maximum elevation per 100 meters, given as a float.
-      0.0167 is 0.5m/30m.
-    * `OWC` --- the saturation of water considered to be the OWC (e.g. 0.7)
-    * `OWC_OFFSET` --- a number (eg. 0.5).  Will place the wellpoint 0.5m above
-      OWC
-    * `LOG` --- any number of LOG lines is allowed, and supported are:
-       * `OWC` --- actual OWC for given date and (x,y) coordinate
-       * `OLD_TVD` --- the old TVD specified in the input Wellpath
-       * `DIFF` --- The difference between `OLD_TVD` and new `TVD`
-       * `SWAT`, `SOIL`, `SGAS`, `PERMX` --- value in wellpoint cell for keyword
-       * `LENGTH` --- the distance between this (x,y) coordinate and the previous
-* then follow n lines containing the keyword `WELLPATH` followed by two or four
-  literals
-    * a filepath (path to the wellpath)
-    * a datetime (format specified below)
-    * optionally "MD <float>" or "TVD <float>".
-
 The filepath is relative to the config file, not the current working directory.
 
-A datetime is specified as either
-* YYYY
-* YYYY-MM
-* YYYY-MM-DD
-If either MM or MM-DD is missing, they will be treated as 01 or 01-01, respectively.
+The config file is a yaml-file having the following format:
 
-Example:
+```yaml
+grid_file: "NORNE_ATW2013.EGRID"
+restart_file: "NORNE_ATW2013.UNRST"
+init_file: "NORNE_ATW2013.INIT"
 
-    GRID       NORNE_1996.EGRID
-    RESTART    NORNE_1996.UNRST
-    INIT       NORNE_1996.INIT
-    --
-    OUTPUT        ../snapout
-    OVERWRITE     False
-    DELTA_Z       0.0167 -- 0.5m per 30m
-    OWC_OFFSET    0.8    -- places well 0.8m above OWC
-    LOG           SWAT   -- outputs SWAT value for the wellpoint's cell
-    LOG           OWC    -- outputs actual OWC for date and x,y coordinate
-    --
-    --KEYWORD  FILENAME                     DATE        D_TYPE  D_SPEC
-    WELLPATH   case1/SIMULATION_WELL_D_p.txt  2022-01-01  MD      2000.0
-    WELLPATH   case1/SIMULATION_WELL_D_q.txt  2022        TVD     1750.0
-    WELLPATH   case1/SIMULATION_WELL_D_r.txt  2022-05
-    WELLPATH   case1/SIMULATION_WELL_E_f.txt  2022        MD      2558.5
-    WELLPATH   case1/SIMULATION_WELL_E_m.txt  2022        MD      2300.0
-    WELLPATH   case1/SIMULATION_WELL_E_n.txt  2022-12-24
+output_dir: "norne-mid"
+overwrite: False
+delta_z: 0.003
+log_keywords: ["PERMX", "OWC", "TVD_DIFF"]
+
+wellpath_files:
+  - {well_file: "norne-test-1-mid.w", date: "1997-05-1"}
+  - {well_file: "norne-test-2-mid.w", date: "1998-01-1"}
+
+```
+
+* Two keywords are mandatory, `grid_file` and `restart_file`, and should be followed by a
+  path to the grid (GRID/EGRID) and restart files (UNRST), respectively (see
+  example below).
+* The `init_file` is required for permeability output, and should be
+  a path to an init file.
+* The following additional keywords are supported:
+    * `output` --- the output directory (path), is set to cwd by default
+    * `overwrite` --- a boolean (True/False) specifying whether the program is
+      allowed to overwrite already existing files.  Defaulted to False; use with
+      care.
+    * `delta_z` --- the maximum elevation per 100 meters, given as a float.
+      0.0167 is 0.5m/30m.
+    * `owc_definition` --- The keyword used for saturation and threshold value used to determine owc
+
+```yaml
+owc_definition:
+  keyword: "SWAT"
+  value: 0.7
+```
+
+* `owc_offset` --- a number (eg. 0.5).  Will place the wellpoint 0.5m above OWC
+* `log_keywords` --- list of values written to the well file:
+   * `OWC` --- actual OWC for given date and (x,y) coordinate
+   * `OLD_TVD` --- the old TVD specified in the input Wellpath
+   * `DIFF` --- The difference between `OLD_TVD` and new `TVD`
+   * `SWAT`, `SOIL`, `SGAS`, `PERMX` --- value in wellpoint cell for keyword
+   * `LENGTH` --- the distance between this (x,y) coordinate and the previous
+* `wellpath_files` --- list of files in the wellpath format
+   * `well_file` --- path to the wellpath file
+   * `date` --- `YYYY-MM-DD` The date to look up values for in the restart file.
+   * `window_depth` --- The depth to start optimizing the well for.
+   * `depth_type` --- Type of depth in the well file, either "MD" or "TVD".
 
 
 
