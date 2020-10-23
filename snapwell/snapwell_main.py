@@ -27,6 +27,16 @@ from snapwell import snap
 from snapwell.snapconfig import OwcDefinition, SnapConfig
 
 
+def percentage(value):
+    try:
+        value = float(value)
+    except (ValueError, TypeError):
+        raise argparse.ArgumentTypeError(f"Value must be float {value}")
+    if 0.0 <= value <= 100.0:
+        return value
+    raise argparse.ArgumentError(f"Value must be in range [0, 100] {value}")
+
+
 class DuplicateFilter(logging.Filter):
     def filter(self, record):
         # add other fields if you need more granular comparison, depends on your app
@@ -73,6 +83,7 @@ class SnapwellRunner:
         self.permx = permx
         self.wellpaths = wellpaths
         self.resinsight = resinsight
+        self.errors = []
 
     def run_and_write(self, wp):
         if not self.config.output_dir.exists():
@@ -97,11 +108,10 @@ class SnapwellRunner:
 
         except ValueError as err:
             logging.error("in well/grid/restart values: %s", err)
-            return False
+            self.errors.append("Snap failed for well path: {}".format(wp.file_name))
         except IOError as err:
             logging.error("while writing file: %s", err)
-            return False
-        return True
+            self.errors.append("Failed to write well path: {}".format(wp.file_name))
 
     def main_loop(self):
         num_snaps = len(self.wellpaths)
@@ -110,28 +120,24 @@ class SnapwellRunner:
         owc_def = self.config.owc_definition
         logging.info("owc_defini = %.3f (%s)", owc_def.value, owc_def.keyword)
         logging.info("output     = %s", self.config.output_dir)
-        success = True
         for i, wp in enumerate(self.wellpaths):
             sep = "=" * 79
             logging.info("\n\n%s", sep)
             logging.info("%d/%d \t Snapping %s", i + 1, num_snaps, wp.well_name)
             start = time()
-            success = success and self.run_and_write(wp)
+            self.run_and_write(wp)
             stop = time()
             sec = round(stop - start, 2)
             logging.info("Operation took %s seconds", str(sec))
-        return success
 
 
 class SnapwellApp:
     def __init__(self, argv):
         self.parser = self.make_parser(argv[0])
-        self.argv = argv[1:]
+        self.args = self.parser.parse_args(argv[1:])
 
-    def parse_args(self):
-        return self.parser.parse_args(self.argv)
-
-    def load_config(self, args):
+    def load_config(self):
+        args = self.args
         snap_conf = args.config
 
         if args.owc_offset:
@@ -283,24 +289,29 @@ class SnapwellApp:
             action="version",
             version="%(prog)s {version}".format(version=VERSION),
         )
-
         parser.add_argument(
             "config",
             type=snapwell_config_file,
             help="The Snapwell configuration file, e.g. snap.sc",
         )
+        parser.add_argument(
+            "-a",
+            "--allow-fail",
+            type=percentage,
+            default=0.0,
+            help="Allow a percentage of snaps to fail without application failing",
+        )
         return parser
 
     def runner(self):
-        args = self.parse_args()
-        config = self.load_config(args)
+        config = self.load_config()
         return SnapwellRunner(
             config,
             self.load_grid_file(config),
             self.load_restart_file(config),
             self.load_permx(config),
             config.wellpaths,
-            args.resinsight,
+            self.args.resinsight,
         )
 
 
@@ -313,14 +324,21 @@ def run(app):
     conftime = round(confstop - fullstart, 2)
     logging.info("\n\nConfiguration completed in %s sec.\n", str(conftime))
 
-    success = runner.main_loop()
+    runner.main_loop()
 
     fullstop = time()
     fullsec = round(fullstop - fullstart, 2)
     logging.info("snapwell completed in %s seconds", str(fullsec))
 
-    if not success:
-        logging.error("Snapwell completed, but errors occurred")
+    if runner.errors:
+        error_msg = "Snapwell completed, but errors occurred: \n" + "\n".join(
+            runner.errors
+        )
+        logging.error(error_msg)
+
+    if len(runner.errors) / len(runner.wellpaths) * 100.0 > app.args.allow_fail:
+        # The users sometimes want the program to pass even though it failed at
+        # snapping all wells
         return -1
     return 0
 
