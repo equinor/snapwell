@@ -269,6 +269,8 @@ def snap(
     The date we use is the last restart step before the given date.
 
     """
+    if keywords is None:
+        keywords = []
     c_owc_offset = well_path.owc_offset
 
     if owc_definition is None:
