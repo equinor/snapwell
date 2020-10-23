@@ -326,11 +326,9 @@ def snap(
         # Ready to enter snap mode?
         new_mode = enterSnapMode(snap_mode, well_path, idx)
         if new_mode and not snap_mode:
-            logging.info("Enabling snap mode at point %d (depth %.2f)", idx, z)
             logging.info(
-                "                      %s %f",
-                str(well_path.depth_type),
-                well_path.window_depth,
+                f"Enabling snap mode at point {idx} (depth {z}), "
+                f"depth type: {well_path.depth_type} window path: {well_path.window_depth}"
             )
             snap_mode = new_mode
 
