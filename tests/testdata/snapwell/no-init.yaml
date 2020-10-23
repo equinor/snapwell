@@ -1,7 +1,0 @@
-grid_file: "grid.EGRID"
-restart_file: "restart.UNRST"
-wellpath_files:
-    - well_file: "well.w"
-      date: "2022-1-1"
-    - well_file: "well1.w"
-      date: "2019-05-1"

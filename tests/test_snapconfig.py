@@ -17,31 +17,50 @@ def same_path(path1, path2):
 
 
 def test_parse_missing_grid():
-    with open(join(conf_path, "test-missing-grid.yaml")) as config_file:
-        config_dict = yaml.safe_load(config_file)
     with pytest.raises(TypeError):
-        SnapConfig(**config_dict)
+        SnapConfig(
+            restart_file="restart.UNRST",
+            wellpath_files=[
+                {"well_file": "well.w", "date": "2022-1-1"},
+                {"well_file": "well1.w", "date": "2019-05-1"},
+            ],
+        )
 
 
 def test_parse_missing_restart():
-    with open(join(conf_path, "test-missing-restart.yaml")) as config_file:
-        config_dict = yaml.safe_load(config_file)
     with pytest.raises(TypeError):
-        SnapConfig(**config_dict)
+        SnapConfig(
+            grid_file="grid.EGRID",
+            wellpath_files=[
+                {"well_file": "well.w", "date": "2022-1-1"},
+                {"well_file": "well1.w", "date": "2019-05-1"},
+            ],
+        )
 
 
 def test_parse_without_init():
-    with open(join(conf_path, "no-init.yaml")) as config_file:
-        config_dict = yaml.safe_load(config_file)
-    conf = SnapConfig(**config_dict)
+    conf = SnapConfig(
+        grid_file="grid.EGRID",
+        restart_file="restart.UNRST",
+        wellpath_files=[
+            {"well_file": "well.w", "date": "2022-1-1"},
+            {"well_file": "well1.w", "date": "2019-05-1"},
+        ],
+    )
     assert conf.init_file is None
 
 
 @pytest.fixture
 def init_config():
-    with open(join(conf_path, "with-init.yaml")) as config_file:
-        config_dict = yaml.safe_load(config_file)
-    return SnapConfig(**config_dict)
+    return SnapConfig(
+        grid_file="grid.EGRID",
+        restart_file="restart.UNRST",
+        init_file="../eclipse/SPE3CASE1.INIT",
+        wellpath_files=[
+            {"well_file": "well.w", "date": "2022-1-1"},
+            {"well_file": "well1.w", "date": "2019-05-1"},
+        ],
+    )
 
 
 def test_set_base_path(init_config):
@@ -65,9 +84,66 @@ def test_wellpath_content(init_config):
 
 @pytest.fixture
 def full_config():
-    with open(join(conf_path, "test-full.yaml")) as config_file:
-        config_dict = yaml.safe_load(config_file)
-    return SnapConfig(**config_dict)
+    return SnapConfig(
+        grid_file="../eclipse/SPE3CASE1.EGRID",
+        restart_file="../eclipse/SPE3CASE1.UNRST",
+        init_file="../eclipse/SPE3CASE1.INIT",
+        output_dir="../eclipse",
+        overwrite=True,
+        owc_offset=0.88,
+        delta_z=0.55,
+        owc_definition={"keyword": "SGAS", "value": 0.31415},
+        log_keywords=["LENGTH", "TVD_DIFF", "OLD_TVD", "OWC", "PERMX"],
+        wellpath_files=[
+            {"well_file": "well.w", "date": "2025-03-31"},
+            {
+                "well_file": "well1.w",
+                "date": "2022-12-03",
+                "depth_type": "TVD",
+                "window_depth": 2000.0,
+            },
+            {
+                "well_file": "well2.w",
+                "date": "2025-03-31",
+                "depth_type": "MD",
+                "window_depth": 158.20,
+            },
+            {
+                "well_file": "well3.w",
+                "date": "2022-12-03",
+                "depth_type": "MD",
+                "window_depth": 1680,
+            },
+            {
+                "well_file": "well4.w",
+                "date": "2023-12-03",
+                "owc_definition": 0.71828,
+                "depth_type": "MD",
+                "window_depth": 1680,
+            },
+            {
+                "well_file": "well5.w",
+                "date": "2024-12-03",
+                "owc_offset": 0.5115,
+                "owc_definition": 0.1828,
+            },
+            {
+                "well_file": "well6.w",
+                "date": "2025-12-03",
+                "owc_offset": 0.115,
+                "owc_definition": 0.828,
+                "depth_type": "MD",
+                "window_depth": 1884,
+            },
+            {
+                "well_file": "well7.w",
+                "date": "2022-1-1",
+                "depth_type": "MD",
+                "window_depth": 4000,
+                "owc_definition": 0.0,
+            },
+        ],
+    )
 
 
 def test_full_config_values(full_config):
