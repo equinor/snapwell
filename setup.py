@@ -15,7 +15,6 @@ setup(
     packages=find_packages(include=["snapwell*"]),
     install_requires=[
         "libecl",
-        "equinor-libres",
         "pydantic",
         "dataclasses>=0.6;python_version<'3.7'",
         "typing_extensions",
