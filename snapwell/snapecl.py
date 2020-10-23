@@ -281,10 +281,10 @@ def snap(
     else:
         logging.info("Overriding global OWC_OFFSET. Using value %.2f", c_owc_offset)
 
-    c_owc_definition = well_path.owc_definition
-    if c_owc_definition is None:
-        c_owc_definition = owc_definition.value
+    if well_path.owc_definition is not None:
+        c_owc_definition = well_path.owc_definition[1]
     else:
+        c_owc_definition = owc_definition.value
         logging.info(
             "Overriding global OWC_DEFINITION. Using value %.2f",
             c_owc_definition,
