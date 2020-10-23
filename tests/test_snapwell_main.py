@@ -1,25 +1,41 @@
 from datetime import date
 from os import path
 from pathlib import Path
-
+from unittest.mock import MagicMock
+import argparse
+import yaml
 import pytest
 import snapwell
 import snapwell.snapwell_main as swm
 
 
+@pytest.fixture()
+def valid_config(tmpdir):
+    config = {
+        "grid_file": path.join(test_data_path, "../eclipse/SPE3CASE1.EGRID"),
+        "restart_file": path.join(test_data_path, "../eclipse/SPE3CASE1.UNRST"),
+        "wellpath_files": [
+            {"well_file": path.join(test_data_path, "well.w"), "date": "2022-1-1"},
+            {"well_file": path.join(test_data_path, "well1.w"), "date": "2019-05-1"},
+        ],
+    }
+    with tmpdir.as_cwd():
+        with open("config_file.yaml", "w") as fout:
+            yaml.dump(config, fout)
+        yield "config_file.yaml"
+
+
 def test_version(capsys):
-    app = swm.SnapwellApp(["snapwell", "--version"])
     with pytest.raises(SystemExit) as e:
-        swm.run(app)
+        swm.SnapwellApp(["snapwell", "--version"])
     assert e.value.code == 0
     assert snapwell.__version__ in capsys.readouterr().out
 
 
 def test_run_missing(capsys, tmp_path):
     missing_file = path.join(tmp_path, "__missing__")
-    app = swm.SnapwellApp(["snapwell", missing_file])
     with pytest.raises(SystemExit) as e:
-        app.parse_args()
+        swm.SnapwellApp(["snapwell", missing_file])
     assert e.value.code == 2
     assert "No such file" in capsys.readouterr().err
 
@@ -33,9 +49,8 @@ def test_missing_config_grid(capsys, tmp_path):
         config_file.write("wellpath_files:\n")
         config_file.write("  - {well_file: 'a.w', date: '2020-1-1'}\n")
 
-    app = swm.SnapwellApp(["snapwell", config_file_path])
     with pytest.raises(SystemExit) as e:
-        app.load_config(app.parse_args())
+        swm.SnapwellApp(["snapwell", config_file_path])
     assert e.value.code == 2
     cap = capsys.readouterr()
     assert "grid_file" in cap.err
@@ -50,9 +65,8 @@ def test_missing_config_restart(capsys, tmp_path):
         config_file.write("wellpath_files:\n")
         config_file.write("  - {well_file: 'a.w', date: '2020-1-1'}\n")
 
-    app = swm.SnapwellApp(["snapwell", config_file_path])
     with pytest.raises(SystemExit) as e:
-        app.load_config(app.parse_args())
+        swm.SnapwellApp(["snapwell", config_file_path])
     assert e.value.code == 2
     assert "restart_file" in capsys.readouterr().err
 
@@ -85,7 +99,7 @@ def test_config_sets_correct_paths(tmp_path):
     write_config(config_file_path, grid_file, restart_file, [(well_file, "2020-1-1")])
 
     app = swm.SnapwellApp(["snapwell", config_file_path])
-    config = app.load_config(app.parse_args())
+    config = app.load_config()
 
     assert config.grid_file == Path(path.join(tmp_path, grid_file))
     assert config.restart_file == Path(path.join(tmp_path, restart_file))
@@ -100,7 +114,7 @@ def test_overwrite(tmp_path, overwrite_keyword):
     write_config(config_file_path)
 
     app = swm.SnapwellApp(["snapwell", config_file_path, overwrite_keyword])
-    config = app.load_config(app.parse_args())
+    config = app.load_config()
     assert config.overwrite
 
 
@@ -135,8 +149,7 @@ def test_missing_init_gives_error(capsys, tmp_path):
     write_config(config_file_path, init_file="__MISSING__.INIT", keywords=["PERMX"])
 
     app = swm.SnapwellApp(["snapwell", config_file_path])
-    args = app.parse_args()
-    config = app.load_config(args)
+    config = app.load_config()
     with pytest.raises(SystemExit) as e:
         app.load_permx(config)
 
@@ -150,7 +163,7 @@ def test_commandline_owc_defintion(config_file):
     app = swm.SnapwellApp(
         ["snapwell", path.join(test_data_path, config_file), "-f", "SWAT:0.7"]
     )
-    owc_definition = app.load_config(app.parse_args()).owc_definition
+    owc_definition = app.load_config().owc_definition
 
     assert owc_definition.keyword == "SWAT"
     assert owc_definition.value == 0.7
@@ -158,10 +171,46 @@ def test_commandline_owc_defintion(config_file):
 
 @pytest.mark.parametrize("owc_def", ["SWAT::", "SWAT0.7", "SWAT:bad", "   :0.7"])
 def test_commandline_owc_defintion_malformed_owc_defnition(capsys, owc_def):
-    app = swm.SnapwellApp(
-        ["snapwell", path.join(test_data_path, "test.yaml"), "-f", owc_def]
-    )
     with pytest.raises(SystemExit) as e:
-        app.parse_args()
+        swm.SnapwellApp(
+            ["snapwell", path.join(test_data_path, "test.yaml"), "-f", owc_def]
+        )
     assert e.value.code == 2
     assert "owc definition" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("input_val", [0, 0.0, 10, 10.0, 100, 100.0])
+def test_percentage(input_val):
+    swm.percentage(input_val) == float(input_val)
+
+
+@pytest.mark.parametrize("input_val", [-1, -1.0, 100.01, 101, 200])
+def test_invalid_percentage(input_val):
+    with pytest.raises(argparse.ArgumentError):
+        swm.percentage(input_val)
+
+
+@pytest.mark.parametrize("input_val", ["a", [1, 2, 3]])
+def test_invalid_percentage(input_val):
+    with pytest.raises(argparse.ArgumentTypeError):
+        swm.percentage(input_val)
+
+
+@pytest.mark.parametrize(
+    "allow_fail_threshold, expected_exit", [[0, -1], [50, 0], [50.1, 0], [100, 0]]
+)
+def test_run_allow_fail(
+    tmpdir, monkeypatch, allow_fail_threshold, expected_exit, valid_config
+):
+    app = swm.SnapwellApp(
+        [
+            "snapwell",
+            valid_config,
+            "--allow-fail",
+            str(allow_fail_threshold),
+            "-w",
+        ]
+    )
+    snap_mock = MagicMock(side_effect=[None, ValueError])
+    monkeypatch.setattr(swm, "snap", snap_mock)
+    assert swm.run(app) == expected_exit
