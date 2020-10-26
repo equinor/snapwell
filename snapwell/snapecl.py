@@ -372,13 +372,11 @@ def snap(
                 z_range = (min(zp, zm), max(zp, zm))
             new_tvd = roundAwayFromEven(min(max(new_tvd, z_range[0]), z_range[1]))
 
-        diff = abs(z - new_tvd)
-        if diff > 100:
+        if abs(z - new_tvd) > 100:
             logging.warning(
-                "Observed a vertical adjustment of %d m. Ignoring.", int(diff)
+                "Observed a vertical adjustment of %d m. Ignoring.", z - new_tvd
             )
             new_tvd = z
-            diff = 0
 
         # END OF WELLPOINT ITERATIONS
 
