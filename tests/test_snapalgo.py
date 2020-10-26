@@ -1,4 +1,4 @@
-import unittest
+import unittest.mock
 
 import pytest
 from ecl import EclTypeEnum
