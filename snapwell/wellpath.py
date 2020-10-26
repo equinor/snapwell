@@ -232,6 +232,11 @@ class WellPath:
             return self._table[idx]
         return [self._table[key][idx] for key in self.headers]
 
+    def __contains__(self, idx):
+        if isinstance(idx, str):
+            return idx in self._table
+        return all(len(self._table[key]) > idx for key in self.headers)
+
     def __setitem__(self, idx, elt):
         lx = len(self.headers)
         ld = len(elt)
