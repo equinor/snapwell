@@ -44,13 +44,7 @@ __status__ = "Prototype"
 __credits__ = ["PG Drange", "K Flikka", "KW Kongsvik"]
 
 from .snapconfig import SnapConfig
-from .snapecl import (
-    enterSnapMode,
-    findKeyword,
-    findRestartStep,
-    roundAwayFromEven,
-    snap,
-)
+from .snapecl import findKeyword, findRestartStep, in_snap_mode, roundAwayFromEven, snap
 from .wellpath import WellPath, finiteFloat
 
 try:

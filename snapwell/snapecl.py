@@ -70,19 +70,26 @@ def findKeyword(kw, restart, date, step=None):
     return restart.iget_named_kw(kw, step)
 
 
-def enterSnapMode(mode, wp, idx):
-    """Checks if we are in snap mode.  This happens if we are already snapping, or
-    if we have reached a prescribed window depth.
+def in_snap_mode(already_in_snap_mode, well_path, idx):
     """
-    if mode or not wp.depth_type:
+    Checks whether snap mode is enabled for the well path at row with index idx.
+    In snap mode means well path should be snapped to owc at that index.
+
+    :returns: True if at the well path row at idx we are in snap mode.
+    :param already_in_snap_mode: True if we are already in snap mode at row idx-1.
+    :param well_path: The well path with rows.
+    :param idx: The index of the row.
+
+    Raises Value Error if the well path depth type is not set correctly.
+    """
+    if already_in_snap_mode or not well_path.depth_type:
         return True
-    t = wp.depth_type
-    if t not in wp:
+    if well_path.depth_type not in well_path:
         raise ValueError(
-            f"Well path {wp} does not contain depth type given in config: {wp.depth_type}"
+            f"Well path {well_path} does not contain given depth type: {well_path.depth_type}"
         )
 
-    return wp[t][idx] > wp.window_depth
+    return well_path[well_path.depth_type][idx] > well_path.window_depth
 
 
 def _activeIdx(grid, i, j, k):
@@ -328,7 +335,7 @@ def snap(
         z_range = (-inf, inf)
 
         # Ready to enter snap mode?
-        new_mode = enterSnapMode(snap_mode, well_path, idx)
+        new_mode = in_snap_mode(snap_mode, well_path, idx)
         if new_mode and not snap_mode:
             logging.info(
                 f"Enabling snap mode at point {idx} (depth {z}), "

@@ -4,6 +4,7 @@ import pytest
 from ecl import EclTypeEnum
 from ecl.eclfile import Ecl3DKW, EclKW
 from ecl.grid import EclGridGenerator
+
 from snapwell import WellPath, snapecl
 
 from .testcase import TestCase
@@ -57,7 +58,7 @@ def test_enter_snap_mode_no_depth_error():
     wp = WellPath(wellname="my well", filename="test.w")
     wp.depth_type = "MD"
     with pytest.raises(ValueError):
-        snapecl.enterSnapMode(False, wp, 0)
+        snapecl.in_snap_mode(False, wp, 0)
 
 
 class SnapAlgorithmTest(TestCase):
