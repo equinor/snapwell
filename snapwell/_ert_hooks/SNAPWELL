@@ -4,5 +4,6 @@ DEFAULT <output> "."
 DEFAULT <owc_offset> 0.5
 DEFAULT <owc_definition> "SWAT:0.7"
 DEFAULT <delta> Inf
+DEFAULT <allow_fail> 0.0
 
-ARGLIST <CONFIG> -o <output> -z <owc_offset> -f <owc_definition> -d <delta>
+ARGLIST <CONFIG> -o <output> -z <owc_offset> -f <owc_definition> -d <delta> -a <allow_fail>
