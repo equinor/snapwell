@@ -77,6 +77,10 @@ def enterSnapMode(mode, wp, idx):
     if mode or not wp.depth_type:
         return True
     t = wp.depth_type
+    if t not in wp:
+        raise ValueError(
+            f"Well path {wp} does not contain depth type given in config: {wp.depth_type}"
+        )
 
     return wp[t][idx] > wp.window_depth
 
