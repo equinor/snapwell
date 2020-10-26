@@ -34,7 +34,7 @@ def percentage(value):
         raise argparse.ArgumentTypeError(f"Value must be float {value}")
     if 0.0 <= value <= 100.0:
         return value
-    raise argparse.ArgumentError(f"Value must be in range [0, 100] {value}")
+    raise argparse.ArgumentTypeError(f"Value must be in range [0, 100] {value}")
 
 
 class DuplicateFilter(logging.Filter):
