@@ -1,6 +1,2 @@
 pytest
 snapshottest
-# This is a workaround as extras_require can not have a url
-# We can consider reinstating this if we want to have the
-# plugin install ert.
-ensemble-reservoir-tool @ git+https://github.com/equinor/ert

@@ -18,6 +18,7 @@ setup(
         "pydantic",
         "dataclasses>=0.6;python_version<'3.7'",
         "typing_extensions",
+        "ert >= 2.38.0b5",
     ],
     entry_points={
         "console_scripts": [
