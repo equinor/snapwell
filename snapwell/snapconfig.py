@@ -63,9 +63,9 @@ class SnapConfig:
     wellpath_files: List[WellPathFile]
     init_file: Optional[Path] = None
     overwrite: bool = False
-    output_dir: Path = "."
+    output_dir: Path = field(default_factory=lambda: Path("."))
     owc_offset: float = 0.5
-    owc_definition: OwcDefinition = OwcDefinition()
+    owc_definition: OwcDefinition = field(default_factory=OwcDefinition)
     log_keywords: List[str] = field(default_factory=list)
     delta_z: float = inf
 
