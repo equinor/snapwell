@@ -22,7 +22,12 @@ from typing import List, Optional
 
 from ecl.eclfile import EclFile
 from ecl.grid import EclGrid
-from pydantic.dataclasses import dataclass
+
+try:
+    from pydantic.v1.dataclasses import dataclass
+except ImportError:
+    from pydantic.dataclasses import dataclass
+
 from typing_extensions import Literal
 
 from .wellpath import WellPath
