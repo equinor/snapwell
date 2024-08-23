@@ -1,10 +1,10 @@
 import unittest.mock
 
 import pytest
-from ecl import EclTypeEnum
-from ecl.eclfile import Ecl3DKW, EclKW
-from ecl.grid import EclGridGenerator
 
+from resdata import ResdataTypeEnum
+from resdata.grid import GridGenerator
+from resdata.resfile import Resdata3DKW, ResdataKW
 from snapwell import WellPath, snapecl
 
 from .testcase import TestCase
@@ -68,9 +68,9 @@ class SnapAlgorithmTest(TestCase):
 
     def generateUniformGridAndSwat(self, ni=10, nj=10, nk=10, x=1.0, y=1.0, z=1.0):
         """Generate an ni*nj*nk grid where each cell has size x,y,z.  Return grid."""
-        g = EclGridGenerator.createRectangular((ni, nj, nk), (x, y, z))
-        kw = EclKW("SWAT", g.getNumActive(), EclTypeEnum.ECL_FLOAT_TYPE)
-        kw3 = Ecl3DKW.castFromKW(kw, g)
+        g = GridGenerator.createRectangular((ni, nj, nk), (x, y, z))
+        kw = ResdataKW("SWAT", g.getNumActive(), ResdataTypeEnum.RD_FLOAT_TYPE)
+        kw3 = Resdata3DKW.castFromKW(kw, g)
         for i in range(g.getNX()):
             for j in range(g.getNY()):
                 for k in range(g.getNZ()):

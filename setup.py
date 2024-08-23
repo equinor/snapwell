@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(include=["snapwell*"]),
     install_requires=[
-        "libecl",
+        "resdata",
         "pydantic",
         "dataclasses>=0.6;python_version<'3.7'",
         "typing_extensions",

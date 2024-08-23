@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import yaml
-from ecl.eclfile import EclFile
+from resdata.resfile import ResdataFile
 
 # utils
 from snapwell import SnapConfig, findKeyword, findRestartStep, roundAwayFromEven
@@ -36,7 +36,7 @@ class SnapwellUtilTest(TestCase):
 
     def test_date(self):
         rfname = os.path.join(self.TEST_ROOT_PATH, "testdata/eclipse/SPE3CASE1.UNRST")
-        rfile = EclFile(rfname)
+        rfile = ResdataFile(rfname)
         step = findRestartStep(rfile, date(1996, 1, 1))
         self.assertEqual(0, step)
 

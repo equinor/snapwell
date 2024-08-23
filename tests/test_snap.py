@@ -8,17 +8,17 @@ from snapwell.snapecl import snap
 from snapwell.wellpath import WellPath
 import snapwell
 
-from ecl import EclTypeEnum
-from ecl.eclfile import Ecl3DKW, EclKW
-from ecl.grid import EclGridGenerator
+from resdata import ResdataTypeEnum
+from resdata.resfile import Resdata3DKW, ResdataKW
+from resdata.grid import GridGenerator
 
 
 @pytest.fixture()
 def homogeneous_grid(ni=3, nj=3, nk=3, x=1.0, y=1.0, z=1.0):
     """Generate an ni*nj*nk grid where each cell has size x,y,z.  Return grid."""
-    grid = EclGridGenerator.createRectangular((ni, nj, nk), (x, y, z))
-    keyword = EclKW("SWAT", grid.getNumActive(), EclTypeEnum.ECL_FLOAT_TYPE)
-    kw3 = Ecl3DKW.castFromKW(keyword, grid)
+    grid = GridGenerator.createRectangular((ni, nj, nk), (x, y, z))
+    keyword = ResdataKW("SWAT", grid.getNumActive(), ResdataTypeEnum.RD_FLOAT_TYPE)
+    kw3 = Resdata3DKW.castFromKW(keyword, grid)
     for i, j, k in product(
         range(grid.getNX()), range(grid.getNY()), range(grid.getNZ())
     ):
@@ -43,23 +43,23 @@ def well_path_mock():
 
 def test_snap_inside_grid(monkeypatch, well_path_mock, homogeneous_grid):
     grid, _, _ = homogeneous_grid
-    eclkw_mock = MagicMock()
-    eclkw_mock.__getitem__.return_value = 0.0
+    resdatakw_mock = MagicMock()
+    resdatakw_mock.__getitem__.return_value = 0.0
     monkeypatch.setattr(
-        snapwell.snapecl, "findKeyword", MagicMock(return_value=eclkw_mock)
+        snapwell.snapecl, "findKeyword", MagicMock(return_value=resdatakw_mock)
     )
     random_date = datetime.datetime(1998, 1, 1, 0, 0)
-    snap(well_path_mock, grid, "EclFile", random_date, 0.5, keywords=["SWAT"])
+    snap(well_path_mock, grid, "ResdataFile", random_date, 0.5, keywords=["SWAT"])
 
     well_path_mock.add_column.assert_called_once_with("SWAT", [0.0, 0.0])
 
 
 def test_snap_outside_grid(monkeypatch, well_path_mock, homogeneous_grid):
     grid, _, _ = homogeneous_grid
-    eclkw_mock = MagicMock()
-    eclkw_mock.__getitem__.return_value = 0.0
+    resdatakw_mock = MagicMock()
+    resdatakw_mock.__getitem__.return_value = 0.0
     monkeypatch.setattr(
-        snapwell.snapecl, "findKeyword", MagicMock(return_value=eclkw_mock)
+        snapwell.snapecl, "findKeyword", MagicMock(return_value=resdatakw_mock)
     )
     random_date = datetime.datetime(1998, 1, 1, 0, 0)
 
@@ -68,4 +68,4 @@ def test_snap_outside_grid(monkeypatch, well_path_mock, homogeneous_grid):
 
     well_path_mock.__getitem__.side_effect = side_effect
     with pytest.raises(ValueError, match="Could not find the point"):
-        snap(well_path_mock, grid, "EclFile", random_date, 0.5, keywords=["SWAT"])
+        snap(well_path_mock, grid, "ResdataFile", random_date, 0.5, keywords=["SWAT"])

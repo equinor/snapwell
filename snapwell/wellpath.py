@@ -39,12 +39,12 @@ def token(f):
     return token
 
 
-def strip_line(l):
+def strip_line(line):
     """strips string and replace tabs and multiple spaces with single space."""
-    l = l.replace("\t", " ")
-    while "  " in l:
-        l = l.replace("  ", " ")
-    return l.strip()
+    line = line.replace("\t", " ")
+    while "  " in line:
+        line = line.replace("  ", " ")
+    return line.strip()
 
 
 def takes_stream(i, mode):

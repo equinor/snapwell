@@ -1,7 +1,7 @@
 import os
 from pkg_resources import resource_filename
 from snapwell.snapwell_main import main as snapwell_main
-from ert.shared.plugins.plugin_manager import hook_implementation
+from ert.plugins.plugin_manager import hook_implementation
 from ert.shared.plugins.plugin_response import plugin_response
 
 
