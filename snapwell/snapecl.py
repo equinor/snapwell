@@ -209,7 +209,7 @@ def find_center_z(grid, column, height):
     the grid. Returns the center point z value of a cell in the grid above the
     given height.  Returns None if cell center above the last column center
     """
-    for (_, _, _, active_idx, _) in column:
+    for _, _, _, active_idx, _ in column:
         cell_center_height = grid.get_xyz(active_index=active_idx)[2]
         if height >= cell_center_height:
             return cell_center_height

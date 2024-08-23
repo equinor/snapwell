@@ -19,6 +19,8 @@ setup(
         "dataclasses>=0.6;python_version<'3.7'",
         "typing_extensions",
         "ert >= 2.38.0b5",
+        "importlib_metadata",
+        "importlib_resources; python_version < '3.9'",
     ],
     entry_points={
         "console_scripts": [

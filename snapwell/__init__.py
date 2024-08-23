@@ -14,26 +14,27 @@
 
 """The Snapwell module, a wellpath optimization module.
 
-   This module provides functionality for reading and writing wellpaths in the
-   RMS format, as well as optimizing the vertical position of these wellpaths
-   provided an Eclipse restart file (UNRST) and a grid file ((E)GRID).
+This module provides functionality for reading and writing wellpaths in the
+RMS format, as well as optimizing the vertical position of these wellpaths
+provided an Eclipse restart file (UNRST) and a grid file ((E)GRID).
 
-   If one wants to use the snapping feature, a snapconfig file is needed.  This
-   file specifies the location of a GRID file, a RESTART file, optionally an
-   INIT file, if the PERMX keyword is wanted.  Then follows the wellpath files
-   and the date (in the UNRST) wanted.
+If one wants to use the snapping feature, a snapconfig file is needed.  This
+file specifies the location of a GRID file, a RESTART file, optionally an
+INIT file, if the PERMX keyword is wanted.  Then follows the wellpath files
+and the date (in the UNRST) wanted.
 
-   See README.md for more information and usage information.
+See README.md for more information and usage information.
 
-   There is a binary in /project/res/bin/snapwell for reading the config file
-   and applying the snapping algorithm.
+There is a binary in /project/res/bin/snapwell for reading the config file
+and applying the snapping algorithm.
 
-   This module exposes the WellPath class, the SnapConfig class as well as the
-   snap algorithm (in snapecl).
+This module exposes the WellPath class, the SnapConfig class as well as the
+snap algorithm (in snapecl).
 
 
 """
-from pkg_resources import DistributionNotFound, get_distribution
+
+from importlib_metadata import distribution, PackageNotFoundError
 
 __author__ = "PG Drange, K Flikka, and KW Kongsvik"
 __email__ = "pgdr@statoil.com"
@@ -48,6 +49,6 @@ from .snapecl import findKeyword, findRestartStep, in_snap_mode, roundAwayFromEv
 from .wellpath import WellPath, finiteFloat
 
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__ = distribution(__name__).version
+except PackageNotFoundError:
     __version__ = "0.0.0"
