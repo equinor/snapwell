@@ -20,8 +20,8 @@ from os import path
 from pathlib import Path
 from typing import List, Optional
 
-from ecl.eclfile import EclFile
-from ecl.grid import EclGrid
+from resdata.grid import Grid
+from resdata.resfile import ResdataFile
 
 try:
     from pydantic.v1.dataclasses import dataclass
@@ -114,12 +114,12 @@ class SnapConfig:
 
     @property
     def grid(self):
-        return EclGrid(str(self.grid_file))
+        return Grid(str(self.grid_file))
 
     @property
     def restart(self):
-        return EclFile(str(self.restart_file))
+        return ResdataFile(str(self.restart_file))
 
     @property
     def init(self):
-        return EclFile(str(self.init_file))
+        return ResdataFile(str(self.init_file))

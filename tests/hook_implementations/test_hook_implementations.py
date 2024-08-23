@@ -4,7 +4,7 @@ from snapwell.snapwell_main import main as snapwell_main
 skip_tests = False
 try:
     import snapwell._ert_hooks._ert_hook
-    from ert.shared.plugins.plugin_manager import ErtPluginManager
+    from ert.plugins import ErtPluginManager
 except ImportError:
     skip_tests = True
 

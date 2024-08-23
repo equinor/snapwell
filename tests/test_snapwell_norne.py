@@ -3,7 +3,7 @@ import subprocess
 import unittest
 
 import pytest
-from ecl.util.test import TestAreaContext
+from resdata.util.test import TestAreaContext
 
 from snapwell import WellPath
 

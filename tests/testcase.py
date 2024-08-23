@@ -1,5 +1,5 @@
 import functools
-from ecl.util.test import ExtendedTestCase
+from resdata.util.test import ExtendedTestCase
 import os
 import py_compile
 

@@ -60,7 +60,7 @@ def findRestartStep(restart, date):
 
 
 def findKeyword(kw, restart, date, step=None):
-    """Find and return kw (EclKW) from restart file at the last step before given
+    """Find and return kw (ResdataKW) from restart file at the last step before given
     date.
     """
     if not step:
@@ -261,8 +261,8 @@ def snap(
     delta=inf,
     owc_definition=None,
 ):
-    """Given a WellPath wp, an EclGrid grid, an EclFile (restart file) rest, and a
-    datetime date, we snap the WellPath wp to fit OWC - offset, where OWC is
+    """Given a WellPath wp, a Resdata Grid 'grid', a ResdataFile (restart file) 'rest', and a
+    datetime 'date', we snap the WellPath wp to fit OWC - offset, where OWC is
     defined as min z st. SWAT(z)<=0.7.
 
     Keywords is a collection of columns we want to add to wp.  Possible
