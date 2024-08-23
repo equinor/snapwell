@@ -63,7 +63,6 @@ class DuplicateFilter(logging.Filter):
 
 
 def warn_without_traceback(message, category, filename, lineno, file=None, line=None):
-
     log = file if hasattr(file, "write") else sys.stderr
     log.write(f"Warning: {message}\n")
 

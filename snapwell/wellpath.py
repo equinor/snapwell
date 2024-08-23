@@ -210,7 +210,6 @@ class WellPath:
             return False
 
     def update(self, col, idx, elt):
-
         """Sets elt in the idx'th position of column col."""
         rs = len(self)
         cs = len(self.headers)
