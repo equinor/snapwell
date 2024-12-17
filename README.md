@@ -10,6 +10,8 @@
     See the GNU General Public License at <http://www.gnu.org/licenses/gpl.html>
     for more details.
 
+> ⚠️This project is archived and no longer maintained.
+
 # Installation and usage
 
 Snappwell is available on [pypi](https://pypi.org/project/snapwell/) and can be
